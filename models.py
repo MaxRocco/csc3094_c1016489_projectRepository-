@@ -17,14 +17,15 @@ class User(db.Model, UserMixin):
     lastname = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
+    completed_onboarding = db.Column(db.Boolean, default=False)
 
-    def __init__(self, email, firstname, lastname, password, role):
+    def __init__(self, email, firstname, lastname, password, role, completed_onboarding):
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.role = role
-
+        self.completed_onboarding = completed_onboarding
 
 def init_db():
     """Initialises the database with an example admin user"""
@@ -36,14 +37,16 @@ def init_db():
             firstname='Max',
             lastname='Ramage',
             password='userPassword!',
-            role='user'
+            role='user',
+            completed_onboarding=True
         )
         baseUser = User(
             email='test@email.com',
             firstname='Jane',
             lastname='Doe',
             password='userPassword!',
-            role='user'
+            role='user',
+            completed_onboarding=False
         )
         db.session.add(user)
         db.session.add(baseUser)

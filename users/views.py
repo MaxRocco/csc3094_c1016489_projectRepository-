@@ -1,10 +1,12 @@
 import logging
 import bcrypt
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, current_user, login_required, logout_user
+from flask_login import current_user
 
 from app import db
 from users.forms import RegisterForm, LoginForm
+
 # from app import db
 # from models import required_roles
 
@@ -27,8 +29,14 @@ def login():
             flash('Incorrect password', 'error')
         else:
             login_user(user)
-            logging.warning('SECURITY - Log in [%s, %s, %s]', current_user.id, form.email.data, request.remote_addr)
-            return redirect(url_for('users.profile'))
+            logging.warning('SECURITY - Log in [%s, %s, %s]', user.id, form.email.data, request.remote_addr)
+
+            # Redirect to onboarding page if the user hasn't completed onboarding
+            if not user.completed_onboarding:
+                return redirect(url_for('users.onboarding'))
+            else:
+                # Redirect to profile page if onboarding is completed
+                return redirect(url_for('users.profile'))
 
     return render_template('users/login.html', form=form)
 
@@ -50,9 +58,7 @@ def account():
                            acc_no=current_user.id,
                            email=current_user.email,
                            firstname=current_user.firstname,
-                           lastname=current_user.lastname,
-                           industry=current_user.industry,
-                           region=current_user.region)
+                           lastname=current_user.lastname)
 
 
 from models import User
@@ -73,15 +79,18 @@ def register():
                         firstname=form.firstname.data,
                         lastname=form.lastname.data,
                         password=form.password.data,
-                        role='user')
+                        role='user',
+                        completed_onboarding=False)
 
         db.session.add(new_user)
         db.session.commit()
 
         logging.warning('SECURITY - Register [%s, %s]', form.email.data, request.remote_addr)
 
-        flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('users.login'))
+        login_user(new_user)
+
+        flash('Registration successful', 'success')
+        return redirect(url_for('users.onboarding'))
 
     # Flash validation errors to the user
     for field, errors in form.errors.items():
@@ -91,11 +100,31 @@ def register():
     return render_template('users/register.html', form=form)
 
 
+#         return redirect(url_for('onboarding'))
+#     return render_template('register.html')
+
+@users_blueprint.route('/onboarding', methods=['GET', 'POST'])
+@login_required  # Ensures that only logged-in users can access this route
+def onboarding():
+    # Since we're using Flask-Login, we can directly use current_user
+    if not current_user or current_user.completed_onboarding:
+        return redirect(url_for('users.profile'))
+
+    if request.method == 'POST':
+        if 'completed_onboarding' in request.form:
+            current_user.completed_onboarding = True
+            db.session.commit()
+            flash('Onboarding completed successfully!', 'success')
+            return redirect(url_for('users.profile'))
+        # Here you can handle other actions like going to the next step
+
+    # Render the current step of the onboarding process
+    return render_template('users/onboarding.html', user=current_user)
+
+
 @users_blueprint.route('/logout')
 @login_required
 def logout():
     logging.warning('SECURITY - Log Out [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
     logout_user()
     return redirect(url_for('index'))
-
-
