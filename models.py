@@ -17,8 +17,6 @@ class User(db.Model, UserMixin):
     lastname = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
-    industry = db.Column(db.String(100))
-    region = db.Column(db.String(100))
 
     def __init__(self, email, firstname, lastname, password, role):
         self.email = email
