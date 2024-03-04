@@ -61,7 +61,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User
+from models import User, Meal, UserMeal
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -120,6 +120,33 @@ def onboarding():
 
     # Render the current step of the onboarding process
     return render_template('users/onboarding.html', user=current_user)
+
+
+@users_blueprint.route('/mealTree')
+@login_required
+def mealTree():
+    meals = Meal.query.order_by(Meal.mealDifficulty).all()
+
+    completed_meals_ids = [user_meal.meal_id for user_meal in current_user.user_meals.filter_by(completed=True).all()]
+
+    return render_template('users/mealTree.html', user=current_user, meals=meals,
+                           completed_meals_ids=completed_meals_ids)
+
+
+@users_blueprint.route('/complete_meal/<int:meal_id>', methods=['POST'])
+@login_required
+def complete_meal(meal_id):
+    # Check if the meal is already marked as completed
+    user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
+
+    if user_meal:
+        user_meal.completed = True
+    else:
+        new_user_meal = UserMeal(user_id=current_user.id, meal_id=meal_id, completed=True)
+        db.session.add(new_user_meal)
+
+    db.session.commit()
+    return redirect(url_for('users.mealTree'))
 
 
 @users_blueprint.route('/logout')

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="title">Welcome to the meal progression tree, {{ user.firstname }}</h1>
+
+<div id="progression-tree">
+    <ul class="tree-level">
+        {% for meal in meals %}
+        <li class="tree-node">
+            <div class="meal">
+                <h3>{{ meal.mealName }}</h3>
+                <img src="#" alt="{{ meal.mealName }} Image" class="meal-image">
+                <p>{{ meal.mealDescription }}</p>
+                {% if meal.mealID not in completed_meals_ids %}
+                    <form action="{{ url_for('users.complete_meal', meal_id=meal.mealID) }}" method="post">
+                        <button type="submit" class="unlock-button">Finish</button>
+                    </form>
+                {% else %}
+                    <button class="unlock-button" disabled>Completed</button>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}
