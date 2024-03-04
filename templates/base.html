@@ -29,16 +29,25 @@
                        <a href="{{ url_for('index') }}" class="navbar-item">
                            Home
                            </a>
+                            {% if current_user.is_anonymous %}
                            <a href="{{ url_for('users.login') }}" class="navbar-item">
                                Login
+                               {% endif %}
                             </a>
+                            {% if current_user.is_anonymous %}
                            <a href="{{ url_for('users.register') }}" class="navbar-item">
                                Register
+                               {% endif %}
                             </a>
                            {% if current_user.is_authenticated %}
                             <a href="{{ url_for('users.logout') }}" class="navbar-item">
                                Logout
                             {% endif %}
+                            </a>
+                           {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('users.profile') }}" class="navbar-item">
+                               Profile
+                                {% endif %}
                             </a>
                            {% if current_user.is_authenticated %}
                             <a href="{{ url_for('users.mealTree') }}" class="navbar-item">
@@ -50,7 +59,6 @@
                 </div>
             </nav>
         </div>
-
         <div class="hero-body">
             <div class="container has-text-centered">
                {% block content %}
