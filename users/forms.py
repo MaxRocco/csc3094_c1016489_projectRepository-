@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import StringField, SubmitField, PasswordField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Email, NoneOf, ValidationError, Length, EqualTo, Regexp
 import re
 
@@ -38,7 +38,8 @@ class RegisterForm(FlaskForm):
     password = PasswordField(validators=[DataRequired(), Length(min=6, max=12), validate_password])
     confirm_password = PasswordField(
         validators=[DataRequired(), EqualTo('password', message="The passwords entered must be equal.")])
-    submit = SubmitField()
+    accept_terms = BooleanField('I agree to the Terms and Conditions', validators=[DataRequired()])
+    submit = SubmitField('Register')
 
 
 class LoginForm(FlaskForm):

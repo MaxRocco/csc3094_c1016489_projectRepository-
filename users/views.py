@@ -69,18 +69,24 @@ def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
+        if not form.accept_terms.data:
+            flash('You must accept the terms and conditions to register.', 'danger')
+            return render_template('users/register.html', form=form)
+
         user = User.query.filter_by(email=form.email.data).first()
 
         if user:
             flash('Email address already exists', 'danger')
             return render_template('users/register.html', form=form)
 
-        new_user = User(email=form.email.data,
-                        firstname=form.firstname.data,
-                        lastname=form.lastname.data,
-                        password=form.password.data,
-                        role='user',
-                        completed_onboarding=False)
+        new_user = User(
+            email=form.email.data,
+            firstname=form.firstname.data,
+            lastname=form.lastname.data,
+            password=form.password.data,  # I MUST HASH THIS BEFORE SUBMITTING, VERY IMPORTANT! (do later)
+            role='user',
+            completed_onboarding=False
+        )
 
         db.session.add(new_user)
         db.session.commit()
@@ -98,6 +104,7 @@ def register():
             flash(f'{field.capitalize()}: {error}', 'danger')
 
     return render_template('users/register.html', form=form)
+
 
 
 #         return redirect(url_for('onboarding'))
