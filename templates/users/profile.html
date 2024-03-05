@@ -2,6 +2,34 @@
 
 {% block content %}
 
-<h1 class="title">Welcome, {{ name }}</h1>
+<div class="column is-6 is-offset-3">
+    <h3 class="title">{{ current_user.firstname }} {{ current_user.lastname }}</h3>
+    <div class="box">
+        <table class="table">
+        <tbody>
+            <tr>
+                <th>Email</th>
+                <td>{{ current_user.email }}</td>
+            </tr>
+            <tr>
+                <th>Experience Points</th>
+                <td>{{ current_user.experiencePoints }}</td>
+            </tr>
+            <tr>
+                <th>Meals Completed</th>
+                <td>{{ current_user.meals_completed }}</td>
+            </tr>
+            <tr>
+                <th>Daily Streak</th>
+                <td>fooBar (implement later)</td>
+            </tr>
+            <tr>
+                <th>Achievements</th>
+                <td>fooBar (implement achievements later)</td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</div>
 
 {% endblock %}

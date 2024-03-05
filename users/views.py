@@ -160,6 +160,8 @@ def complete_meal(meal_id):
         exp_awarded = 25 # * meal.mealDifficulty with base 10 perhaps for additional satisfaction?
         current_user.experiencePoints += exp_awarded
 
+        current_user.meals_completed += 1
+
     db.session.commit()
     flash(f'Meal completed! + {exp_awarded} EXP.')
     return redirect(url_for('users.mealTree'))
