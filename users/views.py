@@ -166,6 +166,12 @@ def complete_meal(meal_id):
     flash(f'Meal completed! + {exp_awarded} EXP.')
     return redirect(url_for('users.mealTree'))
 
+
+@users_blueprint.route('/social')
+@login_required
+def social():
+    return render_template('users/social.html', user=current_user)
+
 @users_blueprint.route('/logout')
 @login_required
 def logout():
