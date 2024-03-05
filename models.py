@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
     completed_onboarding = db.Column(db.Boolean, default=False)
+    experiencePoints = db.Column(db.Integer, default=0)
 
     # Experiment with back_populates='user' relationship and dynamic loading of information
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')

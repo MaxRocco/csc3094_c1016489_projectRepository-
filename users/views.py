@@ -106,9 +106,10 @@ def register():
     return render_template('users/register.html', form=form)
 
 
+@users_blueprint.route('/termsAndConditions')
+def terms_and_conditions():
+    return render_template('users/termsAndConditions.html')
 
-#         return redirect(url_for('onboarding'))
-#     return render_template('register.html')
 
 @users_blueprint.route('/onboarding', methods=['GET', 'POST'])
 @login_required  # Ensures that only logged-in users can access this route
@@ -143,8 +144,12 @@ def mealTree():
 @users_blueprint.route('/complete_meal/<int:meal_id>', methods=['POST'])
 @login_required
 def complete_meal(meal_id):
-    # Check if the meal is already marked as completed
     user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
+
+    meal = Meal.query.get(meal_id)
+    if not meal:
+        flash('Meal not found.')
+        return redirect(url_for('users.mealTree'))
 
     if user_meal:
         user_meal.completed = True
@@ -152,9 +157,12 @@ def complete_meal(meal_id):
         new_user_meal = UserMeal(user_id=current_user.id, meal_id=meal_id, completed=True)
         db.session.add(new_user_meal)
 
-    db.session.commit()
-    return redirect(url_for('users.mealTree'))
+        exp_awarded = 25 # * meal.mealDifficulty with base 10 perhaps for additional satisfaction?
+        current_user.experiencePoints += exp_awarded
 
+    db.session.commit()
+    flash(f'Meal completed! + {exp_awarded} EXP.')
+    return redirect(url_for('users.mealTree'))
 
 @users_blueprint.route('/logout')
 @login_required
