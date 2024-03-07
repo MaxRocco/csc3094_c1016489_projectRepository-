@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import wraps
 import bcrypt
 from flask import render_template
@@ -20,6 +21,7 @@ class User(db.Model, UserMixin):
     completed_onboarding = db.Column(db.Boolean, default=False)
     experiencePoints = db.Column(db.Integer, default=0)
     meals_completed = db.Column(db.Integer, default=0)
+    lastLogin = db.Column(db.Date)
 
     # Experiment with back_populates='user' relationship and dynamic loading of information
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')
@@ -59,17 +61,21 @@ class UserMeal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     meal_id = db.Column(db.Integer, db.ForeignKey('meals.mealID'), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-    completion_date = db.Column(db.DateTime)  # This may come in useful later for retesting users on info.
+    completion_date = db.Column(db.DateTime)  # I will later use this for user knowledge re-testing
 
     user = db.relationship('User',
-                           back_populates='user_meals')  # back populate user meals to update info in there from here (I think)
+                           back_populates='user_meals')  # back populate user meals to update info in there from here
+    # (I think)
     meal = db.relationship('Meal')
 
-    # I want to put completion date, not sure if to do it in the init or not. Figure out later.
-    def __init__(self, user_id, meal_id, completed):
+    def __init__(self, user_id, meal_id, completed=False, completion_date=None):
         self.user_id = user_id
         self.meal_id = meal_id
         self.completed = completed
+        if completed and completion_date is None:
+            self.completion_date = datetime.utcnow()
+        else:
+            self.completion_date = completion_date
 
 
 class Friend(db.Model):

@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+
 import bcrypt
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, current_user, login_required, logout_user
@@ -36,6 +38,8 @@ def login():
                 return redirect(url_for('users.onboarding'))
             else:
                 # Redirect to profile page if onboarding is completed
+                if user and user.is_authenticated:
+                    dailyLoginReward(user)
                 return redirect(url_for('users.profile'))
 
     return render_template('users/login.html', form=form)
@@ -229,6 +233,19 @@ def knowledgeBase():
 @login_required
 def shoppingList():
     return render_template('users/shoppingList.html', user=current_user)
+
+
+def dailyLoginReward(user):
+    today = datetime.utcnow().date()
+    loginRewardXP = 2
+
+    if user.lastLogin != today:
+        user.experiencePoints += loginRewardXP
+        user.lastLogin = today
+
+        flash(f"You have been awarded a daily login bonus of +{loginRewardXP} XP.")
+
+        db.session.commit()
 
 
 @users_blueprint.route('/logout')
