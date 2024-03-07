@@ -1,7 +1,37 @@
-{% extends "base.html" %}
+<!--{% extends "base.html" %}
 
 {% block content %}
-
 <h1 class="title">Social Features page</h1>
+
+<!-- Section to Send Friend Request -->
+<h2>Send a Friend Request</h2>
+<form action="{{ url_for('users_blueprint.add_friend') }}" method="post">
+    <label for="email">Enter Email:</label>
+    <input type="email" name="email" required>
+    <input type="submit" value="Send Request">
+</form>
+
+<!-- Section to List Friend Requests -->
+<h2>Friend Requests</h2>
+<ul>
+    {% for request in friend_requests %}
+    <li>
+        {{ request.firstname }} {{ request.lastname }}
+        <a href="{{ url_for('users_blueprint.accept_friend', requester_id=request.id) }}">Accept</a>
+    </li>
+    {% else %}
+    <li>No friend requests.</li>
+    {% endfor %}
+</ul>
+
+<!-- Section to List Friends -->
+<h2>Your Friends</h2>
+<ul>
+    {% for friend in friends %}
+    <li>{{ friend.firstname }} {{ friend.lastname }}</li>
+    {% else %}
+    <li>No friends yet.</li>
+    {% endfor %}
+</ul>
 
 {% endblock %}

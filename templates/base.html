@@ -50,8 +50,13 @@
                             {% endif %}
                             </a>
                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('users.social') }}" class="navbar-item">
-                               Social
+                            <a href="{{ url_for('users.knowledgeBase') }}" class="navbar-item">
+                               Knowledge Base
+                            {% endif %}
+                            </a>
+                           {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('users.shoppingList') }}" class="navbar-item">
+                               Shopping List
                             {% endif %}
                             </a>
                            {% if current_user.is_authenticated %}

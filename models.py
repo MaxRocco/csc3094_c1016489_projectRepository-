@@ -72,6 +72,17 @@ class UserMeal(db.Model):
         self.completed = completed
 
 
+class Friend(db.Model):
+    __tablename__ = 'friends'
+    id = db.Column(db.Integer, primary_key=True)
+    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    requested_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    accepted = db.Column(db.Boolean, default=False)
+
+    requester = db.relationship('User', foreign_keys=[requester_id], backref='requested_friends')
+    requested = db.relationship('User', foreign_keys=[requested_id], backref='received_friends')
+
+
 def init_db():
     """Initialises the database with an example admin user"""
     with app.app_context():
@@ -105,7 +116,6 @@ def init_db():
         db.session.add(new_meal1)
         db.session.add(new_meal2)
         db.session.commit()
-
 
 
 def clear_db():

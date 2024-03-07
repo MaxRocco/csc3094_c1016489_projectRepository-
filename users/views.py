@@ -61,7 +61,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User, Meal, UserMeal
+from models import User, Meal, UserMeal, Friend
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -157,7 +157,7 @@ def complete_meal(meal_id):
         new_user_meal = UserMeal(user_id=current_user.id, meal_id=meal_id, completed=True)
         db.session.add(new_user_meal)
 
-        exp_awarded = 25 # * meal.mealDifficulty with base 10 perhaps for additional satisfaction?
+        exp_awarded = 25  # * meal.mealDifficulty with base 10 perhaps for additional satisfaction?
         current_user.experiencePoints += exp_awarded
 
         current_user.meals_completed += 1
@@ -167,10 +167,69 @@ def complete_meal(meal_id):
     return redirect(url_for('users.mealTree'))
 
 
-@users_blueprint.route('/social')
+@users_blueprint.route('/meal_detail/<int:meal_id>')
+@login_required
+def meal_detail(meal_id):
+    meal = Meal.query.get_or_404(meal_id)
+    user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
+
+    completed = user_meal and user_meal.completed
+
+    return render_template('users/mealDetails.html', meal=meal, completed=completed)
+
+
+'''@users_blueprint.route('/social', methods=['GET', 'POST'])
 @login_required
 def social():
-    return render_template('users/social.html', user=current_user)
+    if request.method == 'POST':
+        requested_email = request.form['email']
+        # Logic to send a friend request (similar to what we wrote earlier)
+        # ...
+
+    friend_requests = Friend.query.filter_by(requested_id=current_user.id, accepted=False).all()
+    friends = Friend.query.filter(
+        ((Friend.requester_id == current_user.id) | (Friend.requested_id == current_user.id)) &
+        (Friend.accepted == True)
+    ).all()
+
+    # Convert friend IDs to user objects for easier display
+    friends_list = []
+    for friend in friends:
+        friend_id = friend.requested_id if friend.requester_id == current_user.id else friend.requester_id
+        friend_user = User.query.get(friend_id)
+        friends_list.append(friend_user)
+
+    return render_template('users/social.html', friend_requests=friend_requests, friends=friends_list)
+
+
+@users_blueprint.route('/accept_friend/<int:requester_id>', methods=['GET'])
+@login_required
+def accept_friend(requester_id):
+    friend_request = Friend.query.filter_by(requester_id=requester_id, requested_id=current_user.id).first()
+
+    if not friend_request:
+        flash('Friend request not found.', 'danger')
+        return redirect(url_for('users.social'))
+
+    friend_request.accepted = True
+    db.session.commit()
+    flash('Friend request accepted.', 'success')
+
+    return redirect(url_for('users.social'))
+'''
+
+
+@users_blueprint.route('/knowledgeBase')
+@login_required
+def knowledgeBase():
+    return render_template('users/knowledgeBase.html', user=current_user)
+
+
+@users_blueprint.route('/knowledgeBase')
+@login_required
+def shoppingList():
+    return render_template('users/shoppingList.html', user=current_user)
+
 
 @users_blueprint.route('/logout')
 @login_required
