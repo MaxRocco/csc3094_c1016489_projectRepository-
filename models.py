@@ -37,19 +37,51 @@ class User(db.Model, UserMixin):
 
 class Meal(db.Model):
     __tablename__ = 'meals'
-    # extend existing?
 
     mealID = db.Column(db.Integer, primary_key=True)
     mealName = db.Column(db.String(100), nullable=False)
     mealDescription = db.Column(db.Text, nullable=False)
     recipe = db.Column(db.Text, nullable=False)  # Store this as simple text? Probably.
-    mealDifficulty = db.Column(db.Integer, default=1)  # To order meals by difficulty, for progression tree.
+    mealDifficulty = db.Column(db.Integer, default=1)  # Should look into difficulty later probably
 
-    def __init__(self, mealName, mealDescription, recipe, mealDifficulty=1):
+    # Allergen fields for vegan food, directly within the Meal model, rather than through separate model + relationship
+    # as I originally intended. Try how this works. I haven't included animal products, as it's assumed they aren't
+    # present by default in any of the meals on my app, because it's for vegan cooking.
+
+    # I have taken the allergens from https://www.food.gov.uk/business-guidance/allergen-guidance-for-food-businesses
+    # (there are traditionally fourteen, though some the application assumes by default won't be present)
+    # (SEE MY USER TERMS AND CONDITIONS FOR CLARIFICATION ON HOW ALLERGENS IN MEALS ARE HANDLED FOR USERS!!)
+    # I will include more on these allergens in dissertation/documentation.
+
+    # I have removed Eggs, Fish, Milk, and Molluscs from this allergen list (not vegan). More on this in dissertation.
+
+    contains_celery = db.Column(db.Boolean, default=False)
+    contains_gluten = db.Column(db.Boolean, default=False)
+    contains_lupin = db.Column(db.Boolean, default=False)
+    contains_mustard = db.Column(db.Boolean, default=False)
+    contains_peanuts = db.Column(db.Boolean, default=False)
+    contains_sesame = db.Column(db.Boolean, default=False)
+    contains_soybeans = db.Column(db.Boolean, default=False)
+    contains_sulphur_dioxide = db.Column(db.Boolean, default=False)
+    contains_tree_nuts = db.Column(db.Boolean, default=False)
+
+    def __init__(self, mealName, mealDescription, recipe, mealDifficulty=1,
+                 contains_celery=False, contains_gluten=False, contains_lupin=False, contains_mustard=False,
+                 contains_peanuts=False, contains_sesame=False, contains_soybeans=False,
+                 contains_sulphur_dioxide=False, contains_tree_nuts=False):
         self.mealName = mealName
         self.mealDescription = mealDescription
         self.recipe = recipe
         self.mealDifficulty = mealDifficulty
+        self.contains_celery = contains_celery
+        self.contains_gluten = contains_gluten
+        self.contains_lupin = contains_lupin
+        self.contains_mustard = contains_mustard
+        self.contains_peanuts = contains_peanuts
+        self.contains_sesame = contains_sesame
+        self.contains_soybeans = contains_soybeans
+        self.contains_sulphur_dioxide = contains_sulphur_dioxide
+        self.contains_tree_nuts = contains_tree_nuts
 
 
 # UserMeals model for tracking completed meals
