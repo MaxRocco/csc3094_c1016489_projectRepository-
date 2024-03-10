@@ -2,34 +2,74 @@
 
 {% block content %}
 
-<div class="column is-6 is-offset-3">
-    <h3 class="title">{{ current_user.firstname }} {{ current_user.lastname }}</h3>
-    <div class="box">
-        <table class="table">
-        <tbody>
-            <tr>
-                <th>Email</th>
-                <td>{{ current_user.email }}</td>
-            </tr>
-            <tr>
-                <th>Experience Points</th>
-                <td>{{ current_user.experiencePoints }}</td>
-            </tr>
-            <tr>
-                <th>Meals Completed</th>
-                <td>{{ current_user.meals_completed }}</td>
-            </tr>
-            <tr>
-                <th>Daily Streak</th>
-                <td>fooBar (implement later)</td>
-            </tr>
-            <tr>
-                <th>Achievements</th>
-                <td>fooBar (implement achievements later)</td>
-            </tr>
-        </tbody>
-        </table>
+    <div class="column is-6 is-offset-3">
+        <h3 class="title">{{ current_user.firstname }} {{ current_user.lastname }}</h3>
+        <div class="box">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ current_user.email }}</td>
+                </tr>
+                <th>Your Allergies</th>
+                <td>
+                    <ul>
+                        {% if current_user.allergic_to_celery %}
+                            <li>Celery</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_gluten %}
+                            <li>Gluten</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_lupin %}
+                            <li>Lupin</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_mustard %}
+                            <li>Mustard</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_peanuts %}
+                            <li>Peanuts</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_sesame %}
+                            <li>Sesame</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_soybeans %}
+                            <li>Soybeans</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_sulphur_dioxide %}
+                            <li>Sulphur Dioxide</li>
+                        {% endif %}
+                        {% if current_user.allergic_to_tree_nuts %}
+                            <li>Tree Nuts</li>
+                        {% endif %}
+                        {% if not current_user.allergic_to_celery and not current_user.allergic_to_gluten
+                         and not current_user.allergic_to_lupin and not current_user.allergic_to_mustard
+                         and not current_user.allergic_to_peanuts and not current_user.allergic_to_sesame
+                         and not current_user.allergic_to_soybeans and not current_user.allergic_to_sulphur_dioxide
+                         and not current_user.allergic_to_tree_nuts %}
+                            <li>You have reported that you are not allergic to any of the fourteen major food
+                                allergens</li>
+                        {% endif %}
+                    </ul>
+                </td>
+                <tr>
+                    <th>Experience Points</th>
+                    <td>{{ current_user.experiencePoints }}</td>
+                </tr>
+                <tr>
+                    <th>Meals Completed</th>
+                    <td>{{ current_user.meals_completed }}</td>
+                </tr>
+                <tr>
+                    <th>Daily Streak</th>
+                    <td>fooBar (implement later)</td>
+                </tr>
+                <tr>
+                    <th>Achievements</th>
+                    <td>fooBar (implement achievements later)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 {% endblock %}

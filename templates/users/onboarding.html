@@ -1,11 +1,39 @@
 {% extends "base.html" %}
 
+<style>
+    .form-group input[type="checkbox"] {
+    display: inline-block;
+    margin-right: 10px; /* Adjust spacing between checkboxes */
+}
+
+</style>
+
 {% block content %}
 
 <h1 class="title">Welcome to user onboarding, {{ name }}</h1>
 
-<!-- Onboarding form -->
 <form action="{{ url_for('users.onboarding') }}" method="post">
+    <div class="form-group">
+        <label for="allergens">Check any boxes for which allergens you are allergic towards:</label><br>
+        <input type="checkbox" id="celery" name="allergen" value="celery">
+        <label for="celery">Celery</label>
+        <input type="checkbox" id="gluten" name="allergen" value="gluten">
+        <label for="gluten">Gluten</label>
+        <input type="checkbox" id="lupin" name="allergen" value="lupin">
+        <label for="gluten">Lupin</label>
+        <input type="checkbox" id="mustard" name="allergen" value="mustard">
+        <label for="gluten">Mustard</label>
+        <input type="checkbox" id="peanuts" name="allergen" value="peanuts">
+        <label for="gluten">Peanuts</label>
+        <input type="checkbox" id="sesame" name="allergen" value="sesame">
+        <label for="gluten">Sesame</label>
+        <input type="checkbox" id="soybeans" name="allergen" value="soybeans">
+        <label for="gluten">Soybeans</label>
+        <input type="checkbox" id="sulphur_dioxide" name="allergen" value="sulphur_dioxide">
+        <label for="gluten">Sulphur Dioxide</label>
+        <input type="checkbox" id="tree_nuts" name="allergen" value="tree_nuts">
+        <label for="gluten">Tree Nuts</label>
+    </div>
 
     <button type="submit" name="completed_onboarding" class="btn btn-primary">Complete Onboarding</button>
 </form>

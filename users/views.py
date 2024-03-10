@@ -33,11 +33,9 @@ def login():
             login_user(user)
             logging.warning('SECURITY - Log in [%s, %s, %s]', user.id, form.email.data, request.remote_addr)
 
-            # Redirect to onboarding page if the user hasn't completed onboarding
             if not user.completed_onboarding:
                 return redirect(url_for('users.onboarding'))
             else:
-                # Redirect to profile page if onboarding is completed
                 if user and user.is_authenticated:
                     dailyLoginReward(user)
                 return redirect(url_for('users.profile'))
@@ -65,7 +63,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User, Meal, UserMeal, Friend
+from models import User, Meal, UserMeal
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -99,10 +97,9 @@ def register():
 
         login_user(new_user)
 
-        flash('Registration successful', 'success')
+        flash('Registration successful')
         return redirect(url_for('users.onboarding'))
 
-    # Flash validation errors to the user
     for field, errors in form.errors.items():
         for error in errors:
             flash(f'{field.capitalize()}: {error}', 'danger')
@@ -116,21 +113,41 @@ def terms_and_conditions():
 
 
 @users_blueprint.route('/onboarding', methods=['GET', 'POST'])
-@login_required  # Ensures that only logged-in users can access this route
+@login_required
 def onboarding():
-    # Since we're using Flask-Login, we can directly use current_user
     if not current_user or current_user.completed_onboarding:
         return redirect(url_for('users.profile'))
+
+    if 'allergen' in request.form:
+        allergens = request.form.getlist('allergen')
+
+        for allergen in allergens:
+            if allergen == 'celery':
+                current_user.allergic_to_celery = True
+            elif allergen == 'gluten':
+                current_user.allergic_to_gluten = True
+            elif allergen == 'lupin':
+                current_user.allergic_to_lupin = True
+            elif allergen == 'mustard':
+                current_user.allergic_to_mustard = True
+            elif allergen == 'peanuts':
+                current_user.allergic_to_peanuts = True
+            elif allergen == 'sesame':
+                current_user.allergic_to_sesame = True
+            elif allergen == 'soybeans':
+                current_user.allergic_to_soybeans = True
+            elif allergen == 'sulphur_dioxide':
+                current_user.allergic_to_sulphur_dioxide = True
+            elif allergen == 'tree_nuts':
+                current_user.allergic_to_tree_nuts = True
 
     if request.method == 'POST':
         if 'completed_onboarding' in request.form:
             current_user.completed_onboarding = True
             db.session.commit()
-            flash('Onboarding completed successfully!', 'success')
+            flash('Onboarding completed successfully!')
             return redirect(url_for('users.profile'))
-        # Here you can handle other actions like going to the next step
 
-    # Render the current step of the onboarding process
     return render_template('users/onboarding.html', user=current_user)
 
 
@@ -180,47 +197,6 @@ def meal_detail(meal_id):
     completed = user_meal and user_meal.completed
 
     return render_template('users/mealDetails.html', meal=meal, completed=completed)
-
-
-'''@users_blueprint.route('/social', methods=['GET', 'POST'])
-@login_required
-def social():
-    if request.method == 'POST':
-        requested_email = request.form['email']
-        # Logic to send a friend request (similar to what we wrote earlier)
-        # ...
-
-    friend_requests = Friend.query.filter_by(requested_id=current_user.id, accepted=False).all()
-    friends = Friend.query.filter(
-        ((Friend.requester_id == current_user.id) | (Friend.requested_id == current_user.id)) &
-        (Friend.accepted == True)
-    ).all()
-
-    # Convert friend IDs to user objects for easier display
-    friends_list = []
-    for friend in friends:
-        friend_id = friend.requested_id if friend.requester_id == current_user.id else friend.requester_id
-        friend_user = User.query.get(friend_id)
-        friends_list.append(friend_user)
-
-    return render_template('users/social.html', friend_requests=friend_requests, friends=friends_list)
-
-
-@users_blueprint.route('/accept_friend/<int:requester_id>', methods=['GET'])
-@login_required
-def accept_friend(requester_id):
-    friend_request = Friend.query.filter_by(requester_id=requester_id, requested_id=current_user.id).first()
-
-    if not friend_request:
-        flash('Friend request not found.', 'danger')
-        return redirect(url_for('users.social'))
-
-    friend_request.accepted = True
-    db.session.commit()
-    flash('Friend request accepted.', 'success')
-
-    return redirect(url_for('users.social'))
-'''
 
 
 @users_blueprint.route('/knowledgeBase')

@@ -23,6 +23,16 @@ class User(db.Model, UserMixin):
     meals_completed = db.Column(db.Integer, default=0)
     lastLogin = db.Column(db.Date)
 
+    allergic_to_celery = db.Column(db.Boolean, default=False)
+    allergic_to_gluten = db.Column(db.Boolean, default=False)
+    allergic_to_lupin = db.Column(db.Boolean, default=False)
+    allergic_to_mustard = db.Column(db.Boolean, default=False)
+    allergic_to_peanuts = db.Column(db.Boolean, default=False)
+    allergic_to_sesame = db.Column(db.Boolean, default=False)
+    allergic_to_soybeans = db.Column(db.Boolean, default=False)
+    allergic_to_sulphur_dioxide = db.Column(db.Boolean, default=False)
+    allergic_to_tree_nuts = db.Column(db.Boolean, default=False)
+
     # Experiment with back_populates='user' relationship and dynamic loading of information
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')
 
@@ -52,6 +62,8 @@ class Meal(db.Model):
     # (there are traditionally fourteen, though some the application assumes by default won't be present)
     # (SEE MY USER TERMS AND CONDITIONS FOR CLARIFICATION ON HOW ALLERGENS IN MEALS ARE HANDLED FOR USERS!!)
     # I will include more on these allergens in dissertation/documentation.
+
+    # Also see https://www.anaphylaxis.org.uk/about-anaphylaxis/14-major-food-allergens/
 
     # I have removed Eggs, Fish, Milk, and Molluscs from this allergen list (not vegan). More on this in dissertation.
 
@@ -108,17 +120,6 @@ class UserMeal(db.Model):
             self.completion_date = datetime.utcnow()
         else:
             self.completion_date = completion_date
-
-
-class Friend(db.Model):
-    __tablename__ = 'friends'
-    id = db.Column(db.Integer, primary_key=True)
-    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    requested_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    accepted = db.Column(db.Boolean, default=False)
-
-    requester = db.relationship('User', foreign_keys=[requester_id], backref='requested_friends')
-    requested = db.relationship('User', foreign_keys=[requested_id], backref='received_friends')
 
 
 def init_db():
