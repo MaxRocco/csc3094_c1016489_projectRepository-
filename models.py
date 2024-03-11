@@ -22,6 +22,7 @@ class User(db.Model, UserMixin):
     experiencePoints = db.Column(db.Integer, default=0)
     meals_completed = db.Column(db.Integer, default=0)
     lastLogin = db.Column(db.Date)
+    quizzes_completed = db.Column(db.Integer, default=0)
 
     allergic_to_celery = db.Column(db.Boolean, default=False)
     allergic_to_gluten = db.Column(db.Boolean, default=False)
@@ -33,8 +34,9 @@ class User(db.Model, UserMixin):
     allergic_to_sulphur_dioxide = db.Column(db.Boolean, default=False)
     allergic_to_tree_nuts = db.Column(db.Boolean, default=False)
 
-    # Experiment with back_populates='user' relationship and dynamic loading of information
+    # relationship works
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')
+    user_quizzes = db.relationship('UserQuiz', back_populates='user', lazy='dynamic')
 
     def __init__(self, email, firstname, lastname, password, role, completed_onboarding):
         self.email = email
@@ -47,6 +49,7 @@ class User(db.Model, UserMixin):
 
 class Meal(db.Model):
     __tablename__ = 'meals'
+    __table_args__ = {'extend_existing': True}
 
     mealID = db.Column(db.Integer, primary_key=True)
     mealName = db.Column(db.String(100), nullable=False)
@@ -96,20 +99,19 @@ class Meal(db.Model):
         self.contains_tree_nuts = contains_tree_nuts
 
 
-# UserMeals model for tracking completed meals
+# tracks completed meals
 class UserMeal(db.Model):
     __tablename__ = 'user_meals'
-    # again, extend existing? See how this works first without.
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     meal_id = db.Column(db.Integer, db.ForeignKey('meals.mealID'), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-    completion_date = db.Column(db.DateTime)  # I will later use this for user knowledge re-testing
+    completion_date = db.Column(db.DateTime)
 
     user = db.relationship('User',
-                           back_populates='user_meals')  # back populate user meals to update info in there from here
-    # (I think)
+                           back_populates='user_meals')  # this originally fixed some mapper bug. keep it here.
     meal = db.relationship('Meal')
 
     def __init__(self, user_id, meal_id, completed=False, completion_date=None):
@@ -120,6 +122,68 @@ class UserMeal(db.Model):
             self.completion_date = datetime.utcnow()
         else:
             self.completion_date = completion_date
+
+
+class Quiz(db.Model):
+    __tablename__ = 'quizzes'
+    __table_args__ = {'extend_existing': True}
+
+    quizID = db.Column(db.Integer, primary_key=True)
+    quizName = db.Column(db.String(100), nullable=False)
+    quizDescription = db.Column(db.Text, nullable=False)
+    order = db.Column(db.Integer, default=1)
+    # Maybe include difficulty?
+
+    questions = db.relationship('Question', backref='quiz', lazy='dynamic')
+    user_quizzes = db.relationship('UserQuiz', back_populates='associated_quiz', lazy='dynamic')
+
+    def __init__(self, quizName, quizDescription, order=1):
+        self.quizName = quizName
+        self.quizDescription = quizDescription
+        self.order = order
+
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    __table_args__ = {'extend_existing': True}
+
+    questionID = db.Column(db.Integer, primary_key=True)
+    quizID = db.Column(db.Integer, db.ForeignKey('quizzes.quizID'), nullable=False)
+    questionText = db.Column(db.Text, nullable=False)
+    correctAnswer = db.Column(db.String(100), nullable=False)  # I have no idea how I should store this, for now
+    # I will have it as a string and review later
+    otherOptions = db.Column(db.PickleType)  # maybe do this with JSON instead? needs import
+
+    # other options incase as some questions will maybe use a check-box instead of text answer.
+    def __init__(self, quizID, questionText, correctAnswer, otherOptions):
+        self.quizID = quizID
+        self.questionText = questionText
+        self.correctAnswer = correctAnswer
+        self.otherOptions = otherOptions
+
+
+class UserQuiz(db.Model):
+    __tablename__ = 'user_quizzes'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    quizID = db.Column(db.Integer, db.ForeignKey('quizzes.quizID'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    completionDate = db.Column(db.DateTime)
+
+    user = db.relationship('User',
+                           back_populates='user_quizzes')  # back populate user quizzes fixes mapper bug
+    associated_quiz = db.relationship('Quiz', back_populates='user_quizzes')
+
+    def __init__(self, user_id, quizID, completed=False, completionDate=None):
+        self.user_id = user_id
+        self.quizID = quizID
+        self.completed = completed
+        if completed and completionDate is None:
+            self.completionDate = datetime.utcnow()
+        else:
+            self.completionDate = completionDate
 
 
 def init_db():
@@ -150,10 +214,13 @@ def init_db():
         new_meal2 = Meal(mealName="Test Meal 2", mealDescription="Peppery fooBar meal2.", recipe="Peppers, Rice",
                          mealDifficulty=2)
 
+        new_quiz1 = Quiz(quizName="Test Quiz 1", quizDescription="Introduction to Peppers", order=1)
+
         db.session.add(user)
         db.session.add(baseUser)
         db.session.add(new_meal1)
         db.session.add(new_meal2)
+        db.session.add(new_quiz1)
         db.session.commit()
 
 

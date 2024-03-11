@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+<style>
+    .quiz-info {
+        margin-bottom: 20px;
+    }
+
+    .complete-button, .back-button {
+        margin-top: 20px;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .back-button {
+        margin-top: 40px;
+    }
+</style>
+
+<!-- styling might work here? -->
+
+{% block content %}
+    <h1 class="quiz-info">{{ quiz.quizName }}</h1>
+    <img src="#" alt="{{ quiz.quizName }} Image" class="quiz-info quiz-image">
+    <p class="quiz-info">{{ quiz.quizDescription }}</p>
+    <p class="quiz-info">{{ quiz.recipe }}</p>
+
+    {% if not completed %}
+        <form action="{{ url_for('users.complete_quiz', quizID=quiz.quizID) }}" method="post">
+            <button type="submit" class="complete-button">Complete</button>
+        </form>
+    {% else %}
+        <button disabled class="complete-button">Completed</button>
+    {% endif %}
+
+    <a href="{{ url_for('users.knowledgeBase') }}" class="button back-button">Back</a>
+
+{% endblock %}

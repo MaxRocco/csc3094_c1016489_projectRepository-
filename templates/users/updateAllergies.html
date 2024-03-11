@@ -10,9 +10,9 @@
 
 {% block content %}
 
-<h1 class="title">Welcome to user onboarding, {{ name }}</h1>
+<h1 class="title">Update your allergy information as required, {{ current_user.firstname }}</h1>
 
-<form action="{{ url_for('users.onboarding') }}" method="post">
+<form action="{{ url_for('users.updateAllergies') }}" method="post">
     <div class="form-group">
         <label for="allergens">Check any boxes for which allergens you are allergic towards:</label><br>
         <input type="checkbox" id="celery" name="allergen" value="celery">
@@ -35,7 +35,7 @@
         <label for="gluten">Tree Nuts</label>
     </div>
 
-    <button type="submit" name="completed_onboarding" class="btn btn-primary">Complete Onboarding</button>
+    <button type="submit" name="updateAllergies" class="btn btn-primary">Update Allergies</button>
 </form>
 
 {% endblock %}

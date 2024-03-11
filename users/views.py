@@ -63,7 +63,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User, Meal, UserMeal
+from models import User, Meal, UserMeal, Quiz, UserQuiz
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -110,6 +110,50 @@ def register():
 @users_blueprint.route('/termsAndConditions')
 def terms_and_conditions():
     return render_template('users/termsAndConditions.html')
+
+
+@users_blueprint.route('/updateAllergies', methods=['GET', 'POST'])
+@login_required
+def updateAllergies():
+    current_user.allergic_to_celery = False
+    current_user.allergic_to_gluten = False
+    current_user.allergic_to_lupin = False
+    current_user.allergic_to_mustard = False
+    current_user.allergic_to_peanuts = False
+    current_user.allergic_to_sesame = False
+    current_user.allergic_to_soybeans = False
+    current_user.allergic_to_sulphur_dioxide = False
+    current_user.allergic_to_tree_nuts = False
+
+    if request.method == 'POST':
+        if 'allergen' in request.form:
+            allergens = request.form.getlist('allergen')
+
+            for allergen in allergens:
+                if allergen == 'celery':
+                    current_user.allergic_to_celery = True
+                elif allergen == 'gluten':
+                    current_user.allergic_to_gluten = True
+                elif allergen == 'lupin':
+                    current_user.allergic_to_lupin = True
+                elif allergen == 'mustard':
+                    current_user.allergic_to_mustard = True
+                elif allergen == 'peanuts':
+                    current_user.allergic_to_peanuts = True
+                elif allergen == 'sesame':
+                    current_user.allergic_to_sesame = True
+                elif allergen == 'soybeans':
+                    current_user.allergic_to_soybeans = True
+                elif allergen == 'sulphur_dioxide':
+                    current_user.allergic_to_sulphur_dioxide = True
+                elif allergen == 'tree_nuts':
+                    current_user.allergic_to_tree_nuts = True
+
+            flash("Allergy information updated!")
+            db.session.commit()
+            return redirect(url_for('users.profile'))
+
+    return render_template('users/updateAllergies.html', user=current_user)
 
 
 @users_blueprint.route('/onboarding', methods=['GET', 'POST'])
@@ -202,10 +246,53 @@ def meal_detail(meal_id):
 @users_blueprint.route('/knowledgeBase')
 @login_required
 def knowledgeBase():
-    return render_template('users/knowledgeBase.html', user=current_user)
+    quizzes = Quiz.query.order_by(Quiz.order).all()
+
+    completed_quizzes_IDs = [user_quiz.quizID for user_quiz in
+                             current_user.user_quizzes.filter_by(completed=True).all()]
+
+    return render_template('users/knowledgeBase.html', user=current_user, quizzes=quizzes,
+                           completed_quiz_IDs=completed_quizzes_IDs)
 
 
-@users_blueprint.route('/knowledgeBase')
+@users_blueprint.route('/complete_quiz/<int:quizID>', methods=['POST'])
+@login_required
+def complete_quiz(quizID):
+    user_quiz = UserQuiz.query.filter_by(user_id=current_user.id, quizID=quizID).first()
+
+    quiz = Quiz.query.get(quizID)
+    if not quiz:
+        flash('Quiz not found.')
+        return redirect(url_for('users.knowledgeBase'))
+
+    if user_quiz:
+        user_quiz.completed = True
+    else:
+        new_user_quiz = UserQuiz(user_id=current_user.id, quizID=quizID, completed=True)
+        db.session.add(new_user_quiz)
+
+        exp_awarded = 10  # * for additional satisfaction look at this later like with meals
+        current_user.experiencePoints += exp_awarded
+
+        current_user.quizzes_completed += 1
+
+    db.session.commit()
+    flash(f'Quiz completed! + {exp_awarded} EXP.')
+    return redirect(url_for('users.knowledgeBase'))
+
+
+@users_blueprint.route('/quiz_detail/<int:quizID>')
+@login_required
+def quiz_detail(quizID):
+    quiz = Quiz.query.get_or_404(quizID)
+    user_quiz = UserQuiz.query.filter_by(user_id=current_user.id, quizID=quizID).first()
+
+    completed = user_quiz and user_quiz.completed
+
+    return render_template('users/quizDetails.html', quiz=quiz, completed=completed)
+
+
+@users_blueprint.route('/shoppingList')
 @login_required
 def shoppingList():
     return render_template('users/shoppingList.html', user=current_user)

@@ -52,6 +52,11 @@
                     </ul>
                 </td>
                 <tr>
+                    <td colspan="2">
+                        <a href="{{ url_for('users.updateAllergies') }}" class="button is-primary">Update Allergies</a>
+                    </td>
+                </tr>
+                <tr>
                     <th>Experience Points</th>
                     <td>{{ current_user.experiencePoints }}</td>
                 </tr>
@@ -60,6 +65,10 @@
                     <td>{{ current_user.meals_completed }}</td>
                 </tr>
                 <tr>
+                <tr>
+                    <th>Quizzes Completed</th>
+                    <td>{{ current_user.quizzes_completed }}</td>
+                </tr>
                     <th>Daily Streak</th>
                     <td>fooBar (implement later)</td>
                 </tr>
