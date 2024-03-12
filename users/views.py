@@ -63,7 +63,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User, Meal, UserMeal, Quiz, UserQuiz
+from models import User, Meal, UserMeal, Quiz, UserQuiz, Question
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -285,11 +285,12 @@ def complete_quiz(quizID):
 @login_required
 def quiz_detail(quizID):
     quiz = Quiz.query.get_or_404(quizID)
+    questions = Question.query.filter_by(quizID=quizID).all()
     user_quiz = UserQuiz.query.filter_by(user_id=current_user.id, quizID=quizID).first()
 
     completed = user_quiz and user_quiz.completed
 
-    return render_template('users/quizDetails.html', quiz=quiz, completed=completed)
+    return render_template('users/quizDetails.html', questions=questions, quiz=quiz, completed=completed)
 
 
 @users_blueprint.route('/shoppingList')

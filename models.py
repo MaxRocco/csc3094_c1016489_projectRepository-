@@ -188,6 +188,7 @@ class UserQuiz(db.Model):
 
 def init_db():
     """Initialises the database with an example admin user"""
+    from users.quizQuestions import cookingTerminology1
     with app.app_context():
         db.drop_all()
         db.create_all()
@@ -214,13 +215,13 @@ def init_db():
         new_meal2 = Meal(mealName="Test Meal 2", mealDescription="Peppery fooBar meal2.", recipe="Peppers, Rice",
                          mealDifficulty=2)
 
-        new_quiz1 = Quiz(quizName="Test Quiz 1", quizDescription="Introduction to Peppers", order=1)
+        cookingTerminology1()
 
         db.session.add(user)
         db.session.add(baseUser)
         db.session.add(new_meal1)
         db.session.add(new_meal2)
-        db.session.add(new_quiz1)
+
         db.session.commit()
 
 

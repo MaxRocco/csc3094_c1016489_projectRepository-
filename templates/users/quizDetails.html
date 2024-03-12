@@ -14,6 +14,16 @@
     .back-button {
         margin-top: 40px;
     }
+
+    .question {
+        margin-bottom: 20px;
+    }
+
+    .option {
+        margin-left: 20px;
+        display: inline-block;
+    }
+
 </style>
 
 <!-- styling might work here? -->
@@ -24,14 +34,26 @@
     <p class="quiz-info">{{ quiz.quizDescription }}</p>
     <p class="quiz-info">{{ quiz.recipe }}</p>
 
-    {% if not completed %}
+    <div class="quiz-questions">
         <form action="{{ url_for('users.complete_quiz', quizID=quiz.quizID) }}" method="post">
-            <button type="submit" class="complete-button">Complete</button>
+            {% for question in questions %}
+                <div class="question">
+                    <p>{{ question.questionText }}</p>
+                    {% for option in question.otherOptions + [question.correctAnswer] %}
+                        <div class="option">
+                            <input type="radio" name="question_{{ question.questionID }}" value="{{ option }}">
+                            {{ option }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            {% if not completed %}
+                <button type="submit" class="complete-button">Complete</button>
+            {% else %}
+                <button disabled class="complete-button">Completed</button>
+            {% endif %}
         </form>
-    {% else %}
-        <button disabled class="complete-button">Completed</button>
-    {% endif %}
+    </div>
 
     <a href="{{ url_for('users.knowledgeBase') }}" class="button back-button">Back</a>
-
 {% endblock %}
