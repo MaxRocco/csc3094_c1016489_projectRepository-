@@ -271,13 +271,25 @@ def complete_quiz(quizID):
         new_user_quiz = UserQuiz(user_id=current_user.id, quizID=quizID, completed=True)
         db.session.add(new_user_quiz)
 
-        exp_awarded = 10  # * for additional satisfaction look at this later like with meals
-        current_user.experiencePoints += exp_awarded
+        questions = Question.query.filter_by(quizID=quizID).all()
+
+        correctCount = 0
+        totalQuestions = 0
+        for question in questions:
+            totalQuestions += 1
+            user_answer = request.form.get(f'question_{question.questionID}')
+            if user_answer == question.correctAnswer:
+                correctCount += 1
+
+        correctQuestionExperience = correctCount * 2
+        expAwarded = 2 + correctQuestionExperience  # 2 points for completion and additional 2 xp per correct answer
+        current_user.experiencePoints += expAwarded
 
         current_user.quizzes_completed += 1
 
     db.session.commit()
-    flash(f'Quiz completed! + {exp_awarded} EXP.')
+    flash(f'Quiz completed! + {expAwarded} EXP. You scored {correctCount} out of a possible {totalQuestions} in that'
+          f' quiz!')
     return redirect(url_for('users.knowledgeBase'))
 
 
