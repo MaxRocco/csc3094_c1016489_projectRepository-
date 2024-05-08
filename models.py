@@ -6,6 +6,32 @@ from flask_login import UserMixin, current_user
 from app import app, db
 
 
+class Friendship(db.Model):
+    __tablename__ = 'friendships'
+    id = db.Column(db.Integer, primary_key=True)
+    requester_email = db.Column(db.String(100), nullable=False)
+    requested_email = db.Column(db.String(100), nullable=False)
+    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    requested_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(10), default='pending')
+
+    requester = db.relationship('User', foreign_keys=[requester_id], back_populates='requested_friendships')
+    requested = db.relationship('User', foreign_keys=[requested_id], back_populates='received_friendships')
+
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    dateCreated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+
+    user = db.relationship('User', back_populates='posts')
+
+
 class User(db.Model, UserMixin):
     """Defines and initialises the user model, allows for user authentication"""
 
@@ -23,6 +49,8 @@ class User(db.Model, UserMixin):
     meals_completed = db.Column(db.Integer, default=0)
     lastLogin = db.Column(db.Date)
     quizzes_completed = db.Column(db.Integer, default=0)
+    daily_experience = db.Column(db.Integer, default=0)
+    streak = db.Column(db.Integer, default=0)
 
     allergic_to_celery = db.Column(db.Boolean, default=False)
     allergic_to_gluten = db.Column(db.Boolean, default=False)
@@ -37,6 +65,12 @@ class User(db.Model, UserMixin):
     # relationship works
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')
     user_quizzes = db.relationship('UserQuiz', back_populates='user', lazy='dynamic')
+    posts = db.relationship('Post', back_populates='user', lazy='dynamic')
+
+    requested_friendships = db.relationship('Friendship', foreign_keys=[Friendship.requester_id],
+                                            back_populates='requester', lazy='dynamic')
+    received_friendships = db.relationship('Friendship', foreign_keys=[Friendship.requested_id],
+                                           back_populates='requested', lazy='dynamic')
 
     def __init__(self, email, firstname, lastname, password, role, completed_onboarding):
         self.email = email
@@ -54,21 +88,8 @@ class Meal(db.Model):
     mealID = db.Column(db.Integer, primary_key=True)
     mealName = db.Column(db.String(100), nullable=False)
     mealDescription = db.Column(db.Text, nullable=False)
-    recipe = db.Column(db.Text, nullable=False)  # Store this as simple text? Probably.
-    mealDifficulty = db.Column(db.Integer, default=1)  # Should look into difficulty later probably
-
-    # Allergen fields for vegan food, directly within the Meal model, rather than through separate model + relationship
-    # as I originally intended. Try how this works. I haven't included animal products, as it's assumed they aren't
-    # present by default in any of the meals on my app, because it's for vegan cooking.
-
-    # I have taken the allergens from https://www.food.gov.uk/business-guidance/allergen-guidance-for-food-businesses
-    # (there are traditionally fourteen, though some the application assumes by default won't be present)
-    # (SEE MY USER TERMS AND CONDITIONS FOR CLARIFICATION ON HOW ALLERGENS IN MEALS ARE HANDLED FOR USERS!!)
-    # I will include more on these allergens in dissertation/documentation.
-
-    # Also see https://www.anaphylaxis.org.uk/about-anaphylaxis/14-major-food-allergens/
-
-    # I have removed Eggs, Fish, Milk, and Molluscs from this allergen list (not vegan). More on this in dissertation.
+    recipe = db.Column(db.Text, nullable=False)
+    mealDifficulty = db.Column(db.Integer, default=1)
 
     contains_celery = db.Column(db.Boolean, default=False)
     contains_gluten = db.Column(db.Boolean, default=False)
@@ -111,7 +132,7 @@ class UserMeal(db.Model):
     completion_date = db.Column(db.DateTime)
 
     user = db.relationship('User',
-                           back_populates='user_meals')  # this originally fixed some mapper bug. keep it here.
+                           back_populates='user_meals')
     meal = db.relationship('Meal')
 
     def __init__(self, user_id, meal_id, completed=False, completion_date=None):
@@ -132,7 +153,6 @@ class Quiz(db.Model):
     quizName = db.Column(db.String(100), nullable=False)
     quizDescription = db.Column(db.Text, nullable=False)
     order = db.Column(db.Integer, default=1)
-    # Maybe include difficulty?
 
     questions = db.relationship('Question', backref='quiz', lazy='dynamic')
     user_quizzes = db.relationship('UserQuiz', back_populates='associated_quiz', lazy='dynamic')
@@ -150,11 +170,9 @@ class Question(db.Model):
     questionID = db.Column(db.Integer, primary_key=True)
     quizID = db.Column(db.Integer, db.ForeignKey('quizzes.quizID'), nullable=False)
     questionText = db.Column(db.Text, nullable=False)
-    correctAnswer = db.Column(db.String(100), nullable=False)  # I have no idea how I should store this, for now
-    # I will have it as a string and review later
-    otherOptions = db.Column(db.PickleType)  # maybe do this with JSON instead? needs import
+    correctAnswer = db.Column(db.String(100), nullable=False)
+    otherOptions = db.Column(db.PickleType)  # easier than jsonify, which kept breaking
 
-    # other options incase as some questions will maybe use a check-box instead of text answer.
     def __init__(self, quizID, questionText, correctAnswer, otherOptions):
         self.quizID = quizID
         self.questionText = questionText
@@ -173,7 +191,7 @@ class UserQuiz(db.Model):
     completionDate = db.Column(db.DateTime)
 
     user = db.relationship('User',
-                           back_populates='user_quizzes')  # back populate user quizzes fixes mapper bug
+                           back_populates='user_quizzes')
     associated_quiz = db.relationship('Quiz', back_populates='user_quizzes')
 
     def __init__(self, user_id, quizID, completed=False, completionDate=None):

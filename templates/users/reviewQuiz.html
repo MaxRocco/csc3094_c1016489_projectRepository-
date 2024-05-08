@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Quiz Review</h1>
+    {% for question, (user_answer, is_correct) in question_answer_correctness %}
+        <div class="question" style="{{ 'color: green;' if is_correct else 'color: red;' }}">
+            <p>{{ question.questionText }}</p>
+            <p>Your Answer: {{ user_answer }} {{ '✓' if is_correct else '✗' }}</p>
+            {% if not is_correct %}
+                <p>Correct Answer: {{ question.correctAnswer }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <a href="{{ url_for('users.knowledgeBase') }}">Back to Quizzes</a>
+{% endblock %}

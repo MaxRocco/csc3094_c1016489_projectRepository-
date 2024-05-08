@@ -2,29 +2,29 @@
 
 {% block content %}
 
-<style>
-    .tree-node {
-        margin-bottom: 30px;
-    }
+    <style>
+        .tree-node {
+            margin-bottom: 30px;
+        }
 
-</style>
+    </style>
 
 
-<h1 class="title">Welcome to the quiz section, {{ user.firstname }}</h1>
+    <h1 class="title">Welcome to the quiz section, {{ user.firstname }}</h1>
 
-<div id="progression-tree">
-    <ul class="tree-level">
-        {% for quiz in quizzes %}
-        <li class="tree-node">
-            <div class="quiz">
-                <a href="{{ url_for('users.quiz_detail', quizID=quiz.quizID) }}">
-                    <img src="#" alt="{{ quiz.quizName }} Image" class="quiz-image">
-                    <h3>{{ quiz.quizName }}</h3>
-                </a>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+    <div id="progression-tree">
+        <ul class="tree-level">
+            {% for quiz in quizzes %}
+                <li class="tree-node">
+                    <div class="quiz">
+                        <a href="{{ url_for('users.quiz_detail', quizID=quiz.quizID) }}">
+                            <img src="#" alt="{{ quiz.quizName }} Image" class="quiz-image">
+                            <h3>{{ quiz.quizName }}</h3>
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
 {% endblock %}

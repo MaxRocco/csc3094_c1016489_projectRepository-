@@ -47,7 +47,8 @@
                          and not current_user.allergic_to_soybeans and not current_user.allergic_to_sulphur_dioxide
                          and not current_user.allergic_to_tree_nuts %}
                             <li>You have reported that you are not allergic to any of the fourteen major food
-                                allergens</li>
+                                allergens
+                            </li>
                         {% endif %}
                     </ul>
                 </td>
@@ -69,8 +70,8 @@
                     <th>Quizzes Completed</th>
                     <td>{{ current_user.quizzes_completed }}</td>
                 </tr>
-                    <th>Daily Streak</th>
-                    <td>fooBar (implement later)</td>
+                <th>Daily Streak</th>
+                <td>{{ current_user.streak }}</td>
                 </tr>
                 <tr>
                     <th>Achievements</th>

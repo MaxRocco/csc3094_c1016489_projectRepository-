@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import bcrypt
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
@@ -43,7 +43,6 @@ def login():
     return render_template('users/login.html', form=form)
 
 
-# User profile view
 @users_blueprint.route('/profile')
 @login_required
 def profile():
@@ -52,7 +51,6 @@ def profile():
     return render_template('users/profile.html', name=current_user.firstname)
 
 
-# User account view
 @users_blueprint.route('/account')
 @login_required
 def account():
@@ -63,7 +61,7 @@ def account():
                            lastname=current_user.lastname)
 
 
-from models import User, Meal, UserMeal, Quiz, UserQuiz, Question
+from models import User, Meal, UserMeal, Quiz, UserQuiz, Question, Friendship, Post
 
 
 @users_blueprint.route('/register', methods=['GET', 'POST'])
@@ -209,26 +207,36 @@ def mealTree():
 @users_blueprint.route('/complete_meal/<int:meal_id>', methods=['POST'])
 @login_required
 def complete_meal(meal_id):
+    reflection = request.form.get('reflection', '')
+
+    if len(reflection) < 50:
+        flash('Your reflection must be at least 50 characters long in order to mark this meal as complete!')
+        return redirect(url_for('users.meal_detail', meal_id=meal_id))
+
     user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
+    meal = Meal.query.get_or_404(meal_id)
 
-    meal = Meal.query.get(meal_id)
-    if not meal:
-        flash('Meal not found.')
-        return redirect(url_for('users.mealTree'))
-
-    if user_meal:
-        user_meal.completed = True
-    else:
+    if not user_meal:
         new_user_meal = UserMeal(user_id=current_user.id, meal_id=meal_id, completed=True)
         db.session.add(new_user_meal)
 
-        exp_awarded = 25  # * meal.mealDifficulty with base 10 perhaps for additional satisfaction?
-        current_user.experiencePoints += exp_awarded
+    if user_meal and not user_meal.completed:
+        user_meal.completed = True
 
-        current_user.meals_completed += 1
+    newPost = Post(
+        user_id=current_user.id,
+        email=current_user.email,
+        title=f'Reflective account of {meal.mealName}',
+        body=reflection
+    )
+    db.session.add(newPost)
+
+    exp_awarded = 25
+    current_user.experiencePoints += exp_awarded
+    current_user.meals_completed += 1
 
     db.session.commit()
-    flash(f'Meal completed! + {exp_awarded} EXP.')
+    flash(f'Meal completed! + {exp_awarded} EXP. You can view your reflective account on the home page!')
     return redirect(url_for('users.mealTree'))
 
 
@@ -273,12 +281,15 @@ def complete_quiz(quizID):
 
         questions = Question.query.filter_by(quizID=quizID).all()
 
+        totalUserAnswers = []
         correctCount = 0
         totalQuestions = 0
         for question in questions:
             totalQuestions += 1
-            user_answer = request.form.get(f'question_{question.questionID}')
-            if user_answer == question.correctAnswer:
+            userAnswer = request.form.get(f'question_{question.questionID}')
+            isCorrect = userAnswer == question.correctAnswer
+            totalUserAnswers.append((userAnswer, isCorrect))
+            if userAnswer == question.correctAnswer:
                 correctCount += 1
 
         correctQuestionExperience = correctCount * 2
@@ -290,7 +301,21 @@ def complete_quiz(quizID):
     db.session.commit()
     flash(f'Quiz completed! + {expAwarded} EXP. You scored {correctCount} out of a possible {totalQuestions} in that'
           f' quiz!')
-    return redirect(url_for('users.knowledgeBase'))
+    return redirect(url_for('users.reviewQuiz', quizID=quizID, user_answers=totalUserAnswers))
+
+
+#    return redirect(url_for('users.knowledgeBase'))
+
+
+@users_blueprint.route('/review_quiz/<int:quizID>')
+@login_required
+def reviewQuiz(quizID):
+    userAnswers = request.args.getlist('totalUserAnswers')
+    questions = Question.query.filter_by(quizID=quizID).all()
+
+    questionAnswers = zip(questions, userAnswers)
+
+    return render_template('users/reviewQuiz.html', questionAnswers=questionAnswers)
 
 
 @users_blueprint.route('/quiz_detail/<int:quizID>')
@@ -322,6 +347,81 @@ def dailyLoginReward(user):
         flash(f"You have been awarded a daily login bonus of +{loginRewardXP} XP.")
 
         db.session.commit()
+
+
+@users_blueprint.route('/search_users', methods=['GET'])
+@login_required
+def search_users():
+    query = request.args.get('query', '')
+    if not query:
+        flash('Please enter a search query.')
+        return redirect(url_for('index'))
+
+    search_results = User.query.filter(
+        User.id != current_user.id,
+        (User.firstname.ilike(f'%{query}%') | User.lastname.ilike(f'%{query}%') | User.email.ilike(f'%{query}%'))
+    ).all()
+
+    return render_template('main/index.html', search_results=search_results)
+
+
+@users_blueprint.route('/send_friend_request/<int:user_id>', methods=['POST'])
+@login_required
+def send_friend_request(user_id):
+    target_user = User.query.get(user_id)
+    if not target_user:
+        flash('User not found.')
+        return redirect(url_for('index'))
+
+    if target_user.id == current_user.id:
+        flash('You cannot send a friend request to yourself.')
+        return redirect(url_for('users.profile', user_id=user_id))
+
+    existing_request = Friendship.query.filter(
+        ((Friendship.requester_id == current_user.id) & (Friendship.requested_id == user_id)) |
+        ((Friendship.requester_id == user_id) & (Friendship.requested_id == current_user.id))
+    ).first()
+
+    if existing_request:
+        flash('A friend request already exists.')
+        return redirect(url_for('users.profile', user_id=user_id))
+
+    new_request = Friendship(
+        requester_id=current_user.id,
+        requested_id=user_id,
+        requester_email=current_user.email,
+        requested_email=target_user.email
+    )
+    db.session.add(new_request)
+    db.session.commit()
+    flash('Friend request sent.')
+    return redirect(url_for('users.profile', user_id=user_id))
+
+
+@users_blueprint.route('/accept_friend_request/<int:request_id>', methods=['POST'])
+@login_required
+def accept_friend_request(request_id):
+    friendship = Friendship.query.get(request_id)
+    if friendship and friendship.requested_id == current_user.id:
+        friendship.status = 'accepted'
+        db.session.commit()
+        flash('Friend request accepted.')
+    else:
+        flash('Friend request not found.')
+    return redirect(url_for('index'))
+
+
+@users_blueprint.route('/decline_friend_request/<int:request_id>', methods=['POST'])
+@login_required
+def decline_friend_request(request_id):
+    friendship = Friendship.query.get(request_id)
+    if friendship and friendship.requested_id == current_user.id:
+        friendship.status = 'declined'
+        db.session.commit()
+        flash('Friend request declined.')
+    else:
+        flash('Friend request not found.')
+    return redirect(url_for('index'))
 
 
 @users_blueprint.route('/logout')
