@@ -21,6 +21,15 @@
             z-index: 1000;
         }
 
+        .post {
+            margin: 20px 0px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -80,5 +89,25 @@
             <p>Please log in to view social features </p>
         {% endif %}
     </div>
+
+    {% if current_user.is_authenticated %}
+        <div>
+            <h3>Your Reflective Posts</h3>
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="post">
+                        <h4>{{ post.title }}</h4>
+                        <p>{{ post.body }}</p>
+                        <small>Posted on {{ post.dateCreated.strftime('%Y-%m-%d at %H:%M') }}</small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>You have not made any reflective posts yet. Go to the <a
+                        href="{{ url_for('users.mealTree') }}" target=" _blank">Meal Progression Tree</a> to complete a
+                    meal and make your first reflective post!
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
 
 {% endblock %}

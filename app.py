@@ -32,10 +32,18 @@ from users.views import users_blueprint
 
 app.register_blueprint(users_blueprint)
 
+from flask import render_template
+from flask_login import current_user
+from models import Post
+
 
 @app.route('/')
 def index():
-    return render_template('main/index.html')
+    posts = None
+    if current_user.is_authenticated:
+        posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.dateCreated.desc()).all()
+
+    return render_template('main/index.html', posts=posts)
 
 
 @app.errorhandler(400)

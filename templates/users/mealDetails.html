@@ -26,7 +26,8 @@
     {% if not completed %}
         <form action="{{ url_for('users.complete_meal', meal_id=meal.mealID) }}" method="post">
             <textarea name="reflection" required minlength="50"
-                      placeholder="What are your thoughts on preparing this meal?" class="meal-info"></textarea>
+                      placeholder="What are your thoughts on preparing and completing this meal?"
+                      class="meal-info"></textarea>
             <button type="submit" class="complete-button">Complete</button>
         </form>
     {% else %}
