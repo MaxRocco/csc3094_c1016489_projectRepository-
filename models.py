@@ -89,7 +89,9 @@ class Meal(db.Model):
     mealName = db.Column(db.String(100), nullable=False)
     mealDescription = db.Column(db.Text, nullable=False)
     recipe = db.Column(db.Text, nullable=False)
+    recipeInstructions = db.Column(db.Text, nullable=False)
     mealDifficulty = db.Column(db.Integer, default=1)
+    imageUrl = db.Column(db.String(255), default=None)
 
     contains_celery = db.Column(db.Boolean, default=False)
     contains_gluten = db.Column(db.Boolean, default=False)
@@ -101,13 +103,15 @@ class Meal(db.Model):
     contains_sulphur_dioxide = db.Column(db.Boolean, default=False)
     contains_tree_nuts = db.Column(db.Boolean, default=False)
 
-    def __init__(self, mealName, mealDescription, recipe, mealDifficulty=1,
+    def __init__(self, mealName, mealDescription, recipe, recipeInstructions, mealDifficulty=1, imageUrl=None,
                  contains_celery=False, contains_gluten=False, contains_lupin=False, contains_mustard=False,
                  contains_peanuts=False, contains_sesame=False, contains_soybeans=False,
                  contains_sulphur_dioxide=False, contains_tree_nuts=False):
+        self.imageUrl = imageUrl
         self.mealName = mealName
         self.mealDescription = mealDescription
         self.recipe = recipe
+        self.recipeInstructions = recipeInstructions
         self.mealDifficulty = mealDifficulty
         self.contains_celery = contains_celery
         self.contains_gluten = contains_gluten
@@ -228,17 +232,109 @@ def init_db():
             completed_onboarding=False
         )
 
-        new_meal1 = Meal(mealName="Test Meal 1", mealDescription="Peppery fooBar meal.", recipe="Peppers, Rice",
-                         mealDifficulty=1)
-        new_meal2 = Meal(mealName="Test Meal 2", mealDescription="Peppery fooBar meal2.", recipe="Peppers, Rice",
-                         mealDifficulty=2)
+        easyMeal = Meal(mealName="Simple Stir Fry", mealDescription="A simple and tasty stir fry meal, which is a "
+                                                                    "core foundation in any home chefs repertoire of "
+                                                                    "recipes!",
+                        recipe="1 cup of cooked brown rice,"
+                               "2 tablespoons olive oil,"
+                               "1 sliced bell pepper,"
+                               "1 cup of broccoli florets,"
+                               "2 cloves of minced garlic,"
+                               "2 tablespoons of soy sauce,"
+                               "salt and pepper",
+                        recipeInstructions="1. Heat the olive oil in a large pan over medium heat,"
+                                           "2. Add the bell pepper, carrot, broccoli, and mushrooms. Sauté for about "
+                                           "5-7 minutes or until vegetables are tender "
+                                           "3. Add the minced garlic and sauté for another minute,"
+                                           "4. In a small bowl, mix the soy sauce and maple syrup. Pour this mixture "
+                                           "over the vegetables, "
+                                           "5. Stir well to combine everything and cook for another 2 minutes,"
+                                           "6. Serve the stir-fry over the cooked brown rice.",
+                        mealDifficulty=1,
+                        imageUrl="https://www.eatingbyelaine.com/wp-content/uploads/2023/10/EBE-Veggie-Stir-Fry-34.jpg")
+
+        intermediateMeal = Meal(mealName="Intermediate Vegetable Curry",
+                                mealDescription="An intermediate vegetable curry, "
+                                                "that is full of flavour and is "
+                                                "guarenteed to enhance your cooking "
+                                                "skills!",
+                                recipe="2 tablespoons of coconut oil,"
+                                       "1 chopped onion,"
+                                       "1 chopped bell pepper,"
+                                       "1 chopped carrot,"
+                                       "1 cup of broccoli florets,"
+                                       "1 cup of diced tomatoes (canned or fresh),"
+                                       "1 tablespoon of curry powder,"
+                                       "1 teaspoon of turmeric,"
+                                       "1 can of coconut milk,"
+                                       "Salt and pepper",
+                                recipeInstructions="1. Use the cooked brown rice set aside from the "
+                                                   "previous recipe or cook a fresh batch,"
+                                                   "2. Heat coconut oil in a large pot over medium "
+                                                   "heat, "
+                                                   "3. Add the onion and sauté until translucent,"
+                                                   "4. Add the bell pepper, carrot, and broccoli. "
+                                                   "Cook for about 5 minutes, "
+                                                   "5. Stir in the curry powder and turmeric, "
+                                                   "cooking for another minute until fragrant, "
+                                                   "6. Add the diced tomatoes and coconut milk. "
+                                                   "Bring to a simmer, "
+                                                   "7. Reduce heat and let it simmer for 15-20 "
+                                                   "minutes, or until the vegetables are tender "
+                                                   "and the flavors have melded together, "
+                                                   "8. Season with salt and pepper,"
+                                                   "9. Serve the curry over brown rice.",
+                                mealDifficulty=2,
+                                imageUrl="https://fullofplants.com/wp-content/uploads/2019/07/easy-spicy-vietnamese"
+                                         "-curry-vegan-vegetarian-with-tofu-mushrooms-broccoli-taro-eggplant-24"
+                                         "-1400x2100.jpg")
+
+#     Preheat the oven to 375°F (190°C).
+        #     In a skillet, heat olive oil over medium heat. Add onion and garlic, and sauté until onion is translucent.
+        #     Add the carrot, mushrooms, and broccoli. Cook until vegetables are slightly tender.
+        #     Stir in cumin, paprika, and then the cooked rice. Mix well.
+        #     Add the diced tomatoes and season with salt and pepper. Cook for a few more minutes until everything is heated through.
+        #     Stuff the mixture into the hollowed-out bell peppers.
+        #     Place the stuffed peppers in a baking dish and cover with foil.
+        #     Bake for 30-35 minutes, or until the peppers are tender.
+        #     Serve hot, possibly with a side of green salad.
+
+        advancedMeal = Meal(mealName="Advanced Stuffed Peppers",
+                            mealDescription="An advanced and tasty recipe, that will provide a challenge to your "
+                                            "vegan cooking skills, and enhance your overall ability nicely.",
+                            recipe="4 large bell peppers, tops cut off and seeds removed,"
+                                   "1 tablespoon olive oil,"
+                                   "1 diced onion,"
+                                   "2 cloves of minced garlic,"
+                                   "1 diced carrot,"
+                                   "1 cup of chopped mushrooms,"
+                                   "1 cup of finely chopped broccoli florets,"
+                                   "1 teaspoon of cumin,"
+                                   "1 teaspoon of paprika,"
+                                   "1 and a half cups of cooked brown rice,"
+                                   "Salt and pepper",
+                            recipeInstructions="1. Preheat the oven to 375°F (190°C),"
+                                               "2. In a skillet, heat olive oil over medium heat. Add onion and "
+                                               "garlic, and saute until onion is translucent, "
+                                               "3. Add the carrot, mushrooms, and broccoli. Cook until vegetables are "
+                                               "slightly tender, "
+                                               "4. Stir in cumin, paprika, and then the cooked rice and mix well, "
+                                               "5. Add the diced tomatoes and season with salt and pepper. Cook for a "
+                                               "few more minutes until everything is heated through, "
+                                               "6. Stuff the mixture into the hollowed-out bell peppers, "
+                                               "7. Place the stuffed peppers in a baking dish and cover with foil, "
+                                               "8. Bake for 30-35 minutes, or until the peppers are tender,"
+                                               "9. Serve hot, possibly with a side of green salad",
+                            mealDifficulty=3,
+                            imageUrl="https://www.aheadofthyme.com/wp-content/uploads/2018/07/vegan-stuffed-peppers.jpg")
 
         cookingTerminology1()
 
         db.session.add(user)
         db.session.add(baseUser)
-        db.session.add(new_meal1)
-        db.session.add(new_meal2)
+        db.session.add(easyMeal)
+        db.session.add(intermediateMeal)
+        db.session.add(advancedMeal)
 
         db.session.commit()
 

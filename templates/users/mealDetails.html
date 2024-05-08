@@ -5,6 +5,14 @@
         margin-bottom: 20px;
     }
 
+    .meal-image {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        display: block;
+        margin-bottom: 20px;
+    }
+
     .complete-button, .back-button {
         margin-top: 20px;
         display: block;
@@ -14,20 +22,59 @@
     .back-button {
         margin-top: 40px;
     }
+
+    ul.ingredients-list {
+        list-style-type: disc;
+        padding: 0;
+    }
+
+    ul.ingredients-list li {
+        margin-bottom: 10px;
+    }
+
+    ul.recipe-instructions {
+        list-style-type: disc;
+        padding: 0;
+    }
+
+    ul.recipe-instructions li {
+        margin-bottom: 10px;
+    }
 </style>
 
-
 {% block content %}
-    <h1 class="meal-info">{{ meal.mealName }}</h1>
-    <img src="#" alt="{{ meal.mealName }} Image" class="meal-info meal-image">
+    <h1 class="meal-info"><strong>{{ meal.mealName }}</strong></h1>
+    <img src="{{ meal.imageUrl }}" alt="{{ meal.mealName }} Image" style="width: auto; height: 300px;"
+         class="meal-info meal-image">
     <p class="meal-info">{{ meal.mealDescription }}</p>
-    <p class="meal-info">{{ meal.recipe }}</p>
+
+    <br>
+
+    <h3><strong>Ingredients:</strong></h3>
+    <ul class="ingredients-list">
+        {% for ingredient in meal.recipe.split(',') %}
+            <li>{{ ingredient.strip() }}</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <br>
+    <h3><strong>Recipe instructions:</strong></h3>
+    <ul class="recipe-instructions">
+        {% for instruction in meal.recipeInstructions.split(',') %}
+            <li>{{ instruction.strip() }}</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <br>
 
     {% if not completed %}
         <form action="{{ url_for('users.complete_meal', meal_id=meal.mealID) }}" method="post">
             <textarea name="reflection" required minlength="50"
                       placeholder="What are your thoughts on preparing and completing this meal?"
-                      class="meal-info"></textarea>
+                      class="meal-info" rows="10" cols="50"></textarea>
+            <br>
             <button type="submit" class="complete-button">Complete</button>
         </form>
     {% else %}

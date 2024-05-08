@@ -2,34 +2,30 @@
 
 {% block content %}
 
-<style>
-    .tree-node {
-        margin-bottom: 30px;
-    }
+    <style>
+        .tree-node {
+            margin-bottom: 30px;
+        }
 
-</style>
-
-<!-- Let's start with 30 pixels... Looks alright! Later do the same for mealDetails (IT DOESNT WORK!) -->
-<!-- Add front-end to show users which meals they have completed already -->
-<!-- Also add functionality so that users can only click on meals they have 'unlocked with like some XP needed' -->
+    </style>
 
 
+    <h1 class="title">Welcome to the meal progression tree, {{ user.firstname }}</h1>
 
-<h1 class="title">Welcome to the meal progression tree, {{ user.firstname }}</h1>
-
-<div id="progression-tree">
-    <ul class="tree-level">
-        {% for meal in meals %}
-        <li class="tree-node">
-            <div class="meal">
-                <a href="{{ url_for('users.meal_detail', meal_id=meal.mealID) }}">
-                    <img src="#" alt="{{ meal.mealName }} Image" class="meal-image">
-                    <h3>{{ meal.mealName }}</h3>
-                </a>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+    <div id="progression-tree">
+        <ul class="tree-level">
+            {% for meal in meals %}
+                <li class="tree-node">
+                    <div class="meal">
+                        <a href="{{ url_for('users.meal_detail', meal_id=meal.mealID) }}">
+                            <img src="{{ meal.imageUrl }}" alt="{{ meal.mealName }} Image"
+                                 style="width: auto; height: 300px;" class="meal-image">
+                            <h3>{{ meal.mealName }}</h3>
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
 {% endblock %}
