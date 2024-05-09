@@ -5,6 +5,14 @@
         margin-bottom: 20px;
     }
 
+    .quiz-image {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        display: block;
+        margin-bottom: 20px;
+    }
+
     .complete-button, .back-button {
         margin-top: 20px;
         display: block;
@@ -21,24 +29,32 @@
 
     .option {
         margin-left: 20px;
-        display: inline-block;
+        display: block;
     }
 
+    .quiz-questions {
+        margin-bottom: 20px;
+    }
 </style>
 
-<!-- styling might work here? -->
-
 {% block content %}
-    <h1 class="quiz-info">{{ quiz.quizName }}</h1>
-    <img src="#" alt="{{ quiz.quizName }} Image" class="quiz-info quiz-image">
+    <h1 class="quiz-info"><strong>{{ quiz.quizName }}</strong></h1>
+
+    <br>
+
+    <img src="{{ quiz.imageUrl }}" alt="{{ quiz.quizName }} Image" class="quiz-info quiz-image">
+
+    <br>
+
     <p class="quiz-info">{{ quiz.quizDescription }}</p>
-    <p class="quiz-info">{{ quiz.recipe }}</p>
+
+    <br>
 
     <div class="quiz-questions">
         <form action="{{ url_for('users.complete_quiz', quizID=quiz.quizID) }}" method="post">
             {% for question in questions %}
                 <div class="question">
-                    <p>{{ question.questionText }}</p>
+                    <p><strong>{{ question.questionText }}</strong></p>
                     {% for option in question.otherOptions + [question.correctAnswer] %}
                         <div class="option">
                             <input type="radio" name="question_{{ question.questionID }}" value="{{ option }}">
@@ -48,12 +64,15 @@
                 </div>
             {% endfor %}
             {% if not completed %}
+                <br>
                 <button type="submit" class="complete-button">Complete</button>
             {% else %}
+                <br>
                 <button disabled class="complete-button">Completed</button>
             {% endif %}
         </form>
     </div>
+
 
     <a href="{{ url_for('users.knowledgeBase') }}" class="button back-button">Back</a>
 {% endblock %}

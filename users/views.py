@@ -37,7 +37,7 @@ def login():
                 return redirect(url_for('users.onboarding'))
             else:
                 if user and user.is_authenticated:
-                    dailyLoginReward(user)
+                    daily_login_reward(user)
                 return redirect(url_for('users.profile'))
 
     return render_template('users/login.html', form=form)
@@ -276,7 +276,7 @@ def complete_quiz(quizID):
 
     quiz = Quiz.query.get(quizID)
     if not quiz:
-        flash('Quiz not found.')
+        flash('No quiz has been found here')
         return redirect(url_for('users.knowledgeBase'))
 
     if user_quiz:
@@ -338,11 +338,11 @@ def quiz_detail(quizID):
 
 @users_blueprint.route('/shoppingList')
 @login_required
-def shoppingList():
+def shopping_list():
     return render_template('users/shoppingList.html', user=current_user)
 
 
-def dailyLoginReward(user):
+def daily_login_reward(user):
     today = datetime.utcnow().date()
     loginRewardXP = 2
 
@@ -360,7 +360,7 @@ def dailyLoginReward(user):
 def search_users():
     query = request.args.get('query', '')
     if not query:
-        flash('Please enter a search query.')
+        flash('You must enter a user email before attempting to search!')
         return redirect(url_for('index'))
 
     search_results = User.query.filter(
@@ -374,13 +374,13 @@ def search_users():
 @users_blueprint.route('/send_friend_request/<int:user_id>', methods=['POST'])
 @login_required
 def send_friend_request(user_id):
-    target_user = User.query.get(user_id)
-    if not target_user:
-        flash('User not found.')
+    targetUser = User.query.get(user_id)
+    if not targetUser:
+        flash('The user cannot be found')
         return redirect(url_for('index'))
 
-    if target_user.id == current_user.id:
-        flash('You cannot send a friend request to yourself.')
+    if targetUser.id == current_user.id:
+        flash('You cannot send a friend request to yourself!')
         return redirect(url_for('users.profile', user_id=user_id))
 
     existing_request = Friendship.query.filter(
@@ -389,18 +389,18 @@ def send_friend_request(user_id):
     ).first()
 
     if existing_request:
-        flash('A friend request already exists.')
-        return redirect(url_for('users.profile', user_id=user_id))
+        flash(f'You have already sent a pending friend request to {targetUser.email}')
+        return redirect(url_for('users.profile', user_id=current_user.id))
 
     new_request = Friendship(
         requester_id=current_user.id,
         requested_id=user_id,
         requester_email=current_user.email,
-        requested_email=target_user.email
+        requested_email=targetUser.email
     )
     db.session.add(new_request)
     db.session.commit()
-    flash('Friend request sent.')
+    flash(f'You have sent a friend request to {targetUser.email}!')
     return redirect(url_for('users.profile', user_id=user_id))
 
 
@@ -411,9 +411,9 @@ def accept_friend_request(request_id):
     if friendship and friendship.requested_id == current_user.id:
         friendship.status = 'accepted'
         db.session.commit()
-        flash('Friend request accepted.')
+        flash('You have accepted this friend request!')
     else:
-        flash('Friend request not found.')
+        flash('There is no pending friend requests here')
     return redirect(url_for('index'))
 
 
@@ -424,9 +424,9 @@ def decline_friend_request(request_id):
     if friendship and friendship.requested_id == current_user.id:
         friendship.status = 'declined'
         db.session.commit()
-        flash('Friend request declined.')
+        flash('You have declined this user\'s friend request')
     else:
-        flash('Friend request not found.')
+        flash('There is no pending friend request here')
     return redirect(url_for('index'))
 
 

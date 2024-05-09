@@ -3,14 +3,30 @@
 {% block content %}
 
     <h1 class="title">Reflective Journals Page</h1>
-    <h2 class="subtitle">Explore your journal entries and connections</h2>
+
 
     <style>
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content h1, .content h2, .content h3 {
+        margin-bottom: 0.5em; /
+    }
+
+    .content p {
+        margin-top: 0.2em;
+        margin-bottom: 2em;
+    }
+
+
         #friend-functionality {
             position: absolute;
-            top: 0;
-            left: 0;
-            margin: 10px;
+            top: 10px;
+            right: 540px;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -20,6 +36,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         }
+
 
         .post {
             margin: 20px 0px;
@@ -45,12 +62,18 @@
         }
     </style>
 
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
     <div id="friend-functionality">
         {% if current_user.is_authenticated %}
-            <h3>Welcome, {{ current_user.firstname }}!</h3>
+            <h2>Welcome, {{ current_user.firstname }}!</h2>
 
             <div>
-                <h4>Friend Requests:</h4>
+                <h3>Friend Requests:</h3>
                 {% for request in current_user.received_friendships.filter_by(status='pending').all() %}
                     <p>{{ request.requester.firstname }} wants to be your friend</p>
                     <form method="post" action="{{ url_for('users.accept_friend_request', request_id=request.id) }}">
@@ -73,7 +96,7 @@
             </div>
 
             {% if search_results %}
-                <h4>Search Results: </h4>
+                <h5>Search Results: </h5>
                 {% for user in search_results %}
                     <p>{{ user.firstname }} {{ user.lastname }} - {{ user.email }}</p>
                     {% if user.id != current_user.id %}
@@ -92,7 +115,7 @@
 
     {% if current_user.is_authenticated %}
         <div>
-            <h3>Your Reflective Posts</h3>
+            <h6>Your Reflective Posts</h6>
             {% if posts %}
                 {% for post in posts %}
                     <div class="post">

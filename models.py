@@ -62,7 +62,6 @@ class User(db.Model, UserMixin):
     allergic_to_sulphur_dioxide = db.Column(db.Boolean, default=False)
     allergic_to_tree_nuts = db.Column(db.Boolean, default=False)
 
-    # relationship works
     user_meals = db.relationship('UserMeal', back_populates='user', lazy='dynamic')
     user_quizzes = db.relationship('UserQuiz', back_populates='user', lazy='dynamic')
     posts = db.relationship('Post', back_populates='user', lazy='dynamic')
@@ -157,14 +156,16 @@ class Quiz(db.Model):
     quizName = db.Column(db.String(100), nullable=False)
     quizDescription = db.Column(db.Text, nullable=False)
     order = db.Column(db.Integer, default=1)
+    imageUrl = db.Column(db.String(255), default=None)
 
     questions = db.relationship('Question', backref='quiz', lazy='dynamic')
     user_quizzes = db.relationship('UserQuiz', back_populates='associated_quiz', lazy='dynamic')
 
-    def __init__(self, quizName, quizDescription, order=1):
+    def __init__(self, quizName, quizDescription, order=1, imageUrl=None):
         self.quizName = quizName
         self.quizDescription = quizDescription
         self.order = order
+        self.imageUrl = imageUrl
 
 
 class Question(db.Model):
@@ -210,7 +211,7 @@ class UserQuiz(db.Model):
 
 def init_db():
     """Initialises the database with an example admin user"""
-    from users.quizQuestions import cookingTerminology1
+    from users.quizQuestions import easy_quiz, intermediate_quiz, advanced_quiz
     with app.app_context():
         db.drop_all()
         db.create_all()
@@ -289,16 +290,6 @@ def init_db():
                                          "-curry-vegan-vegetarian-with-tofu-mushrooms-broccoli-taro-eggplant-24"
                                          "-1400x2100.jpg")
 
-#     Preheat the oven to 375°F (190°C).
-        #     In a skillet, heat olive oil over medium heat. Add onion and garlic, and sauté until onion is translucent.
-        #     Add the carrot, mushrooms, and broccoli. Cook until vegetables are slightly tender.
-        #     Stir in cumin, paprika, and then the cooked rice. Mix well.
-        #     Add the diced tomatoes and season with salt and pepper. Cook for a few more minutes until everything is heated through.
-        #     Stuff the mixture into the hollowed-out bell peppers.
-        #     Place the stuffed peppers in a baking dish and cover with foil.
-        #     Bake for 30-35 minutes, or until the peppers are tender.
-        #     Serve hot, possibly with a side of green salad.
-
         advancedMeal = Meal(mealName="Advanced Stuffed Peppers",
                             mealDescription="An advanced and tasty recipe, that will provide a challenge to your "
                                             "vegan cooking skills, and enhance your overall ability nicely.",
@@ -328,7 +319,9 @@ def init_db():
                             mealDifficulty=3,
                             imageUrl="https://www.aheadofthyme.com/wp-content/uploads/2018/07/vegan-stuffed-peppers.jpg")
 
-        cookingTerminology1()
+        easy_quiz()
+        intermediate_quiz()
+        advanced_quiz()
 
         db.session.add(user)
         db.session.add(baseUser)
