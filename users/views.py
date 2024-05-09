@@ -198,10 +198,16 @@ def onboarding():
 def mealTree():
     meals = Meal.query.order_by(Meal.mealDifficulty).all()
 
-    completed_meals_ids = [user_meal.meal_id for user_meal in current_user.user_meals.filter_by(completed=True).all()]
+    completed_meals_ids = {user_meal.meal_id for user_meal in current_user.user_meals.filter_by(completed=True).all()}
+
+    nextMeal = None
+    for meal in meals:
+        if meal.mealID not in completed_meals_ids:
+            nextMeal = meal
+            break
 
     return render_template('users/mealTree.html', user=current_user, meals=meals,
-                           completed_meals_ids=completed_meals_ids)
+                           completed_meals_ids=completed_meals_ids, next_meal=nextMeal)
 
 
 @users_blueprint.route('/complete_meal/<int:meal_id>', methods=['POST'])

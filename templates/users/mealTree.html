@@ -9,19 +9,25 @@
 
     </style>
 
-
     <h1 class="title">Welcome to the meal progression tree, {{ user.firstname }}</h1>
 
     <div id="progression-tree">
         <ul class="tree-level">
             {% for meal in meals %}
-                <li class="tree-node">
+                <li class="tree-node {% if meal.mealID not in completed_meals_ids and meal != next_meal %}locked{% endif %}">
                     <div class="meal">
-                        <a href="{{ url_for('users.meal_detail', meal_id=meal.mealID) }}">
+                        {% if meal == next_meal or meal.mealID in completed_meals_ids %}
+                            <a href="{{ url_for('users.meal_detail', meal_id=meal.mealID) }}">
+                                <img src="{{ meal.imageUrl }}" alt="{{ meal.mealName }} Image"
+                                     style="width: auto; height: 300px;" class="meal-image">
+                                <h3>{{ meal.mealName }}</h3>
+                            </a>
+                        {% else %}
                             <img src="{{ meal.imageUrl }}" alt="{{ meal.mealName }} Image"
                                  style="width: auto; height: 300px;" class="meal-image">
                             <h3>{{ meal.mealName }}</h3>
-                        </a>
+                            <p>Locked</p>
+                        {% endif %}
                     </div>
                 </li>
             {% endfor %}
