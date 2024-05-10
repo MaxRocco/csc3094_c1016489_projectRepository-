@@ -216,8 +216,8 @@ def complete_meal(meal_id):
     reflection = request.form.get('reflection', '')
     makePublic = request.form.get('make_public') == 'true'
 
-    if len(reflection) < 50:
-        flash('Your reflection must be at least 50 characters long in order to mark this meal as complete!')
+    if 500 < len(reflection) < 25:
+        flash('Your reflection must be between 25 and 500 characters to mark this meal as complete!')
         return redirect(url_for('users.meal_detail', meal_id=meal_id))
 
     user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
@@ -383,7 +383,7 @@ def send_friend_request(user_id):
 
     if targetUser.id == current_user.id:
         flash('You cannot send a friend request to yourself!')
-        return redirect(url_for('users.profile', user_id=user_id))
+        return redirect(url_for('index', user_id=user_id))
 
     existingRequest = Friendship.query.filter(
         ((Friendship.requester_id == current_user.id) & (Friendship.requested_id == user_id)) |
@@ -393,7 +393,7 @@ def send_friend_request(user_id):
     if existingRequest:
         flash(f'You have already sent friends with {targetUser.email} or have sent a pending friend request to this '
               f'user!')
-        return redirect(url_for('users.profile', user_id=current_user.id))
+        return redirect(url_for('index', user_id=current_user.id))
 
     newRequest = Friendship(
         requester_id=current_user.id,
@@ -404,7 +404,7 @@ def send_friend_request(user_id):
     db.session.add(newRequest)
     db.session.commit()
     flash(f'You have sent a friend request to {targetUser.email}!')
-    return redirect(url_for('users.profile', user_id=user_id))
+    return redirect(url_for('index', user_id=user_id))
 
 
 @users_blueprint.route('/accept_friend_request/<int:request_id>', methods=['POST'])

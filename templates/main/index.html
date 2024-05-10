@@ -37,6 +37,8 @@
             border-radius: 5px;
             background-color: #f9f9f9;
             color: #333;
+            width: 600px;
+            word-wrap: break-word;
         }
 
         button {
@@ -121,7 +123,7 @@
         <br>
         {% for friendship in confirmed_friendships %}
             <p>
-                Friend: {{ friendship.requester.email if friendship.requested_id == current_user.id else friendship.requested.email }}</p>
+                {{ friendship.requester.email if friendship.requested_id == current_user.id else friendship.requested.email }}</p>
         {% else %}
             <p>You currently have no confirmed friendships</p>
             <br>
