@@ -20,7 +20,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.init_app(app)
 
-from models import User
+from models import User, Friendship
 
 
 @login_manager.user_loader
@@ -40,10 +40,22 @@ from models import Post
 @app.route('/')
 def index():
     posts = None
+    sentRequests = None
+    activeFriendships = None
+
     if current_user.is_authenticated:
         posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.dateCreated.desc()).all()
 
-    return render_template('main/index.html', posts=posts)
+        friendships = Friendship.query.filter(
+            (Friendship.requester_id == current_user.id) | (Friendship.requested_id == current_user.id)
+        ).all()
+
+        sentRequests = [f for f in friendships if f.requester_id == current_user.id and f.status == 'pending']
+        activeFriendships = [f for f in friendships if f.status == 'accepted']
+
+    return render_template('main/index.html', posts=posts,
+                           sent_requests=sentRequests,
+                           confirmed_friendships=activeFriendships)
 
 
 @app.errorhandler(400)

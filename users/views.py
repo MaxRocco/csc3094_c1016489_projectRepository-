@@ -363,12 +363,12 @@ def search_users():
         flash('You must enter a user email before attempting to search!')
         return redirect(url_for('index'))
 
-    search_results = User.query.filter(
+    searchResults = User.query.filter(
         User.id != current_user.id,
         (User.firstname.ilike(f'%{query}%') | User.lastname.ilike(f'%{query}%') | User.email.ilike(f'%{query}%'))
     ).all()
 
-    return render_template('main/index.html', search_results=search_results)
+    return render_template('main/index.html', search_results=searchResults)
 
 
 @users_blueprint.route('/send_friend_request/<int:user_id>', methods=['POST'])
@@ -383,22 +383,22 @@ def send_friend_request(user_id):
         flash('You cannot send a friend request to yourself!')
         return redirect(url_for('users.profile', user_id=user_id))
 
-    existing_request = Friendship.query.filter(
+    existingRequest = Friendship.query.filter(
         ((Friendship.requester_id == current_user.id) & (Friendship.requested_id == user_id)) |
         ((Friendship.requester_id == user_id) & (Friendship.requested_id == current_user.id))
     ).first()
 
-    if existing_request:
+    if existingRequest:
         flash(f'You have already sent a pending friend request to {targetUser.email}')
         return redirect(url_for('users.profile', user_id=current_user.id))
 
-    new_request = Friendship(
+    newRequest = Friendship(
         requester_id=current_user.id,
         requested_id=user_id,
         requester_email=current_user.email,
         requested_email=targetUser.email
     )
-    db.session.add(new_request)
+    db.session.add(newRequest)
     db.session.commit()
     flash(f'You have sent a friend request to {targetUser.email}!')
     return redirect(url_for('users.profile', user_id=user_id))
@@ -428,7 +428,6 @@ def decline_friend_request(request_id):
     else:
         flash('There is no pending friend request here')
     return redirect(url_for('index'))
-
 
 @users_blueprint.route('/logout')
 @login_required
