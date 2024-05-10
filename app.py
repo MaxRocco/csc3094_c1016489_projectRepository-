@@ -39,19 +39,29 @@ from models import Post
 
 @app.route('/')
 def index():
-    posts = None
-    sentRequests = None
-    activeFriendships = None
+    posts = []
+    sentRequests = []
+    activeFriendships = []
 
     if current_user.is_authenticated:
         posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.dateCreated.desc()).all()
 
         friendships = Friendship.query.filter(
-            (Friendship.requester_id == current_user.id) | (Friendship.requested_id == current_user.id)
+            ((Friendship.requester_id == current_user.id) | (Friendship.requested_id == current_user.id)) &
+            (Friendship.status == 'accepted')
         ).all()
+
+        friendIDs = [f.requester_id if f.requested_id == current_user.id else f.requested_id for f in friendships]
+
+        friendPosts = Post.query.filter(Post.user_id.in_(friendIDs), Post.public == True).order_by(
+            Post.dateCreated.desc()).all()
+
+        posts.extend(friendPosts)
 
         sentRequests = [f for f in friendships if f.requester_id == current_user.id and f.status == 'pending']
         activeFriendships = [f for f in friendships if f.status == 'accepted']
+
+    posts.sort(key=lambda x: x.dateCreated, reverse=True)
 
     return render_template('main/index.html', posts=posts,
                            sent_requests=sentRequests,

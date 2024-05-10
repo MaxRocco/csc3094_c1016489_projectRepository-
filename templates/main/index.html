@@ -121,18 +121,22 @@
 
     {% if current_user.is_authenticated %}
         <div>
-            <h6>Your Reflective Posts</h6>
+            <h6><strong>Reflective Posts made by you or your friends</strong></h6>
+            <br>
             {% if posts %}
                 {% for post in posts %}
                     <div class="post">
                         <h4>{{ post.title }}</h4>
                         <p>{{ post.body }}</p>
                         <small>Posted on {{ post.dateCreated.strftime('%Y-%m-%d at %H:%M') }}</small>
+                        <small>By: {{ post.user.firstname }} {{ post.user.lastname }}</small>
                     </div>
                 {% endfor %}
             {% else %}
-                <p>You have not made any reflective posts yet. Go to the <a
-                        href="{{ url_for('users.mealTree') }}" target=" _blank">Meal Progression Tree</a> to complete a
+                <br>
+                <p>You or your friends have not made any reflective posts yet. Go to the <a
+                        href="{{ url_for('users.mealTree') }}" target=" _blank"><strong>Meal Progression
+                    Tree</strong></a> to complete a
                     meal and make your first reflective post!
                 </p>
             {% endif %}

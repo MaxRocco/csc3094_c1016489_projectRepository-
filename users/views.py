@@ -214,6 +214,7 @@ def mealTree():
 @login_required
 def complete_meal(meal_id):
     reflection = request.form.get('reflection', '')
+    makePublic = request.form.get('make_public') == 'true'
 
     if len(reflection) < 50:
         flash('Your reflection must be at least 50 characters long in order to mark this meal as complete!')
@@ -233,7 +234,8 @@ def complete_meal(meal_id):
         user_id=current_user.id,
         email=current_user.email,
         title=f'Reflective account of {meal.mealName}',
-        body=reflection
+        body=reflection,
+        public=makePublic
     )
     db.session.add(newPost)
 
@@ -389,7 +391,8 @@ def send_friend_request(user_id):
     ).first()
 
     if existingRequest:
-        flash(f'You have already sent a pending friend request to {targetUser.email}')
+        flash(f'You have already sent friends with {targetUser.email} or have sent a pending friend request to this '
+              f'user!')
         return redirect(url_for('users.profile', user_id=current_user.id))
 
     newRequest = Friendship(
@@ -428,6 +431,7 @@ def decline_friend_request(request_id):
     else:
         flash('There is no pending friend request here')
     return redirect(url_for('index'))
+
 
 @users_blueprint.route('/logout')
 @login_required
