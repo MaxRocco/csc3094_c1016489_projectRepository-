@@ -2,8 +2,16 @@
 
 {% block content %}
 
-    <h1 class="title">Reflective Journals Page</h1>
 
+    {% if current_user.is_anonymous %}
+        <h1 class="title">Please <a href="{{ url_for('users.login') }}" target=" _blank"><strong>login</strong></a> or <a
+            href="{{ url_for('users.register') }}" target=" _blank"><strong>register</strong></a> an account to access
+            the application!</h1>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+        <h1 class="title">Reflective Journals Page</h1>
+    {% endif %}
 
     <style>
 
@@ -99,25 +107,27 @@
         {% endif %}
     </div>
 
-    <h3><strong>Sent Friend Requests</strong></h3>
-    <br>
-    {% for request in sent_requests %}
-        <p>To: {{ request.requested.email }} - Status: Pending</p>
-    {% else %}
-        <p>You have not sent any active or pending friend requests</p>
+    {% if current_user.is_authenticated %}
+        <h3><strong>Sent Friend Requests</strong></h3>
         <br>
-    {% endfor %}
+        {% for request in sent_requests %}
+            <p>To: {{ request.requested.email }} - Status: Pending</p>
+        {% else %}
+            <p>You have not sent any active or pending friend requests</p>
+            <br>
+        {% endfor %}
 
-    <h3><strong>Your Friends</strong></h3>
-    <br>
-    {% for friendship in confirmed_friendships %}
-        <p>
-            Friend: {{ friendship.requester.email if friendship.requested_id == current_user.id else friendship.requested.email }}</p>
-    {% else %}
-        <p>You currently have no confirmed friendships</p>
+        <h3><strong>Your Friends</strong></h3>
         <br>
-    {% endfor %}
-    </div>
+        {% for friendship in confirmed_friendships %}
+            <p>
+                Friend: {{ friendship.requester.email if friendship.requested_id == current_user.id else friendship.requested.email }}</p>
+        {% else %}
+            <p>You currently have no confirmed friendships</p>
+            <br>
+        {% endfor %}
+        </div>
+    {% endif %}
 
     {% if current_user.is_authenticated %}
         <div>

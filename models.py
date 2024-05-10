@@ -124,8 +124,8 @@ class Meal(db.Model):
         self.contains_tree_nuts = contains_tree_nuts
 
 
-# tracks completed meals
 class UserMeal(db.Model):
+    """Tracks the meals in which a user has completed within the meal progression tree"""
     __tablename__ = 'user_meals'
     __table_args__ = {'extend_existing': True}
 
@@ -150,6 +150,7 @@ class UserMeal(db.Model):
 
 
 class Quiz(db.Model):
+    """Quiz model that is used to create new quizzes within the knowledge base page"""
     __tablename__ = 'quizzes'
     __table_args__ = {'extend_existing': True}
 
@@ -170,6 +171,7 @@ class Quiz(db.Model):
 
 
 class Question(db.Model):
+    """Defines questions that can be added to each quiz"""
     __tablename__ = 'questions'
     __table_args__ = {'extend_existing': True}
 
@@ -187,6 +189,7 @@ class Question(db.Model):
 
 
 class UserQuiz(db.Model):
+    """Tracks the quizzes in which a user has completed within the knowledge base or quizzes page"""
     __tablename__ = 'user_quizzes'
     __table_args__ = {'extend_existing': True}
 
@@ -211,7 +214,10 @@ class UserQuiz(db.Model):
 
 
 def init_db():
-    """Initialises the database with an example admin user"""
+    """Initialises the database with a base user, that is useful when testing the application. Also includes some base
+    meals and content for the meal progression tree, and initialises some quizzes within the knowledge base or quiz
+    page. New quizzes, or meal recipes can be added here as desired, and get processed to the application automatically
+    when the project is run."""
     from users.quizQuestions import easy_quiz, intermediate_quiz, advanced_quiz
     with app.app_context():
         db.drop_all()
@@ -334,7 +340,7 @@ def init_db():
 
 
 def clear_db():
-    """Deletes everything in the database"""
+    """Deletes everything in the database when called, useful for testing. Do not include as part of a public version"""
     with app.app_context():
         db.drop_all()
 
@@ -358,4 +364,9 @@ def clear_db():
 Be sure to call this function every time after running the test file, or when you first run the web application
 in your own environment. '''
 
+
+# Initialises the database that is described above when the project is run. During testing, each time the project is run
+# the database resets when this function is called. In order to keep the database consistent across runtimes, ensure
+# that this function is not called. It is kept uncommented for testing and prototype purposes. Do not include this
+# function call on a public release version.
 init_db()
