@@ -147,6 +147,17 @@ def updateAllergies():
                 elif allergen == 'tree_nuts':
                     current_user.allergic_to_tree_nuts = True
 
+            if 'none' in allergens:
+                current_user.allergic_to_celery = False
+                current_user.allergic_to_gluten = False
+                current_user.allergic_to_lupin = False
+                current_user.allergic_to_mustard = False
+                current_user.allergic_to_peanuts = False
+                current_user.allergic_to_sesame = False
+                current_user.allergic_to_soybeans = False
+                current_user.allergic_to_sulphur_dioxide = False
+                current_user.allergic_to_tree_nuts = False
+
             flash("Allergy information updated!")
             db.session.commit()
             return redirect(url_for('users.profile'))

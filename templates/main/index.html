@@ -62,8 +62,8 @@
     <br>
     <br>
 
+    {% if current_user.is_authenticated %}
     <div id="friend-functionality">
-        {% if current_user.is_authenticated %}
             <h2>Welcome, {{ current_user.firstname }}!</h2>
 
 
