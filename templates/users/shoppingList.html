@@ -2,6 +2,34 @@
 
 {% block content %}
 
-    <h1 class="title">Shopping List</h1>
+    <h1 class="title">Shopping List for {{ user.firstname }}</h1>
+
+    {% if current_meal %}
+        <h2>Ingredients required to prepare your current meal in the progression tree:
+            <strong>{{ current_meal.mealName }} </strong></h2>
+        <br>
+        <ul>
+            {% for ingredient in current_ingredients %}
+                <li>{{ ingredient }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have completed the meal progression tree, well done!</p>
+    {% endif %}
+
+    {% if next_meal and current_meal %}
+        <br>
+        <h2>Ingredients required to prepare the next meal in the progression tree after you have completed your current
+            meal: <strong>{{ next_meal.mealName }}</strong></h2>
+        <br>
+        <ul>
+            {% for ingredient in next_ingredients %}
+                <li>{{ ingredient }}</li>
+            {% endfor %}
+        </ul>
+    {% elif not next_meal %}
+        <br>
+        <p>There is no next meal in the progression tree, meaning you have nearly completed the entire tree!</p>
+    {% endif %}
 
 {% endblock %}

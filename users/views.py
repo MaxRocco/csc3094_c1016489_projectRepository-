@@ -1,22 +1,15 @@
 import logging
-from datetime import datetime, timedelta
-
+from datetime import datetime
 import bcrypt
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, current_user, login_required, logout_user
 from flask_login import current_user
-
 from app import db
 from users.forms import RegisterForm, LoginForm
 
-# from app import db
-# from models import required_roles
-
-# Blueprint configuration
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 
 
-# Login user view
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -25,13 +18,11 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
 
         if not user:
-            flash('No user found with that email', 'error')
+            flash('There is no user with the email address you entered', 'error')
         elif not bcrypt.checkpw(form.password.data.encode('utf-8'), user.password):
-            logging.warning('SECURITY - Invalid Login Attempt [%s, %s]', form.email.data, request.remote_addr)
             flash('Incorrect password', 'error')
         else:
             login_user(user)
-            logging.warning('SECURITY - Log in [%s, %s, %s]', user.id, form.email.data, request.remote_addr)
 
             if not user.completed_onboarding:
                 return redirect(url_for('users.onboarding'))
@@ -70,28 +61,26 @@ def register():
 
     if form.validate_on_submit():
         if not form.accept_terms.data:
-            flash('You must accept the terms and conditions to register.', 'danger')
+            flash('You must accept the terms and conditions to register!')
             return render_template('users/register.html', form=form)
 
         user = User.query.filter_by(email=form.email.data).first()
 
         if user:
-            flash('Email address already exists', 'danger')
+            flash('There already exists a user with this email address, try to login instead')
             return render_template('users/register.html', form=form)
 
         new_user = User(
             email=form.email.data,
             firstname=form.firstname.data,
             lastname=form.lastname.data,
-            password=form.password.data,  # I MUST HASH THIS BEFORE SUBMITTING, VERY IMPORTANT! (do later)
+            password=form.password.data,
             role='user',
             completed_onboarding=False
         )
 
         db.session.add(new_user)
         db.session.commit()
-
-        logging.warning('SECURITY - Register [%s, %s]', form.email.data, request.remote_addr)
 
         login_user(new_user)
 
@@ -100,7 +89,7 @@ def register():
 
     for field, errors in form.errors.items():
         for error in errors:
-            flash(f'{field.capitalize()}: {error}', 'danger')
+            flash(f'{field.capitalize()}: {error}')
 
     return render_template('users/register.html', form=form)
 
@@ -352,7 +341,29 @@ def quiz_detail(quizID):
 @users_blueprint.route('/shoppingList')
 @login_required
 def shopping_list():
-    return render_template('users/shoppingList.html', user=current_user)
+    meals = Meal.query.order_by(Meal.mealDifficulty).all()
+
+    completed_meals_ids = {user_meal.meal_id for user_meal in current_user.user_meals.filter_by(completed=True).all()}
+
+    current_meal = None
+    next_meal = None
+    found_current = False
+
+    for meal in meals:
+        if meal.mealID not in completed_meals_ids:
+            if not found_current:
+                current_meal = meal
+                found_current = True
+            else:
+                next_meal = meal
+                break
+
+    currentIngredients = current_meal.recipe.split(",") if current_meal else []
+    nextIngredients = next_meal.recipe.split(",") if next_meal else []
+
+    return render_template('users/shoppingList.html', user=current_user,
+                           current_meal=current_meal, next_meal=next_meal,
+                           current_ingredients=currentIngredients, next_ingredients=nextIngredients)
 
 
 def daily_login_reward(user):
