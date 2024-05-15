@@ -52,6 +52,10 @@ class User(db.Model, UserMixin):
     quizzes_completed = db.Column(db.Integer, default=0)
     daily_experience = db.Column(db.Integer, default=0)
     streak = db.Column(db.Integer, default=0)
+    totalMeatCo2 = db.Column(db.Float, default=0)
+    totalVeganCo2 = db.Column(db.Float, default=0)
+    co2Reduction = db.Column(db.Float, default=0)
+    co2ReductionPercent = db.Column(db.Float, default=0)
 
     allergic_to_celery = db.Column(db.Boolean, default=False)
     allergic_to_gluten = db.Column(db.Boolean, default=False)
@@ -103,10 +107,13 @@ class Meal(db.Model):
     contains_sulphur_dioxide = db.Column(db.Boolean, default=False)
     contains_tree_nuts = db.Column(db.Boolean, default=False)
 
+    veganCo2 = db.Column(db.Float, nullable=False)
+    meatCo2 = db.Column(db.Float, nullable=False)
+
     def __init__(self, mealName, mealDescription, recipe, recipeInstructions, mealDifficulty=1, imageUrl=None,
                  contains_celery=False, contains_gluten=False, contains_lupin=False, contains_mustard=False,
                  contains_peanuts=False, contains_sesame=False, contains_soybeans=False,
-                 contains_sulphur_dioxide=False, contains_tree_nuts=False):
+                 contains_sulphur_dioxide=False, contains_tree_nuts=False, veganCo2=0.0, meatCo2=0.0):
         self.imageUrl = imageUrl
         self.mealName = mealName
         self.mealDescription = mealDescription
@@ -122,6 +129,8 @@ class Meal(db.Model):
         self.contains_soybeans = contains_soybeans
         self.contains_sulphur_dioxide = contains_sulphur_dioxide
         self.contains_tree_nuts = contains_tree_nuts
+        self.veganCo2 = veganCo2
+        self.meatCo2 = meatCo2
 
 
 class UserMeal(db.Model):
@@ -269,7 +278,8 @@ def init_db():
                                            "5. Stir well to combine everything and cook for another 2 minutes,"
                                            "6. Serve the stir-fry over the cooked brown rice.",
                         mealDifficulty=1,
-                        imageUrl="https://www.eatingbyelaine.com/wp-content/uploads/2023/10/EBE-Veggie-Stir-Fry-34.jpg")
+                        imageUrl="https://www.eatingbyelaine.com/wp-content/uploads/2023/10/EBE-Veggie-Stir-Fry-34.jpg",
+                        veganCo2=1.5, meatCo2=2.3)
 
         intermediateMeal = Meal(mealName="Intermediate Vegetable Curry",
                                 mealDescription="An intermediate vegetable curry, "
@@ -305,7 +315,7 @@ def init_db():
                                 mealDifficulty=2,
                                 imageUrl="https://fullofplants.com/wp-content/uploads/2019/07/easy-spicy-vietnamese"
                                          "-curry-vegan-vegetarian-with-tofu-mushrooms-broccoli-taro-eggplant-24"
-                                         "-1400x2100.jpg")
+                                         "-1400x2100.jpg", veganCo2=1.2, meatCo2=2.6)
 
         advancedMeal = Meal(mealName="Advanced Stuffed Peppers",
                             mealDescription="An advanced and tasty recipe, that will provide a challenge to your "
@@ -334,7 +344,7 @@ def init_db():
                                                "8. Bake for 30-35 minutes, or until the peppers are tender,"
                                                "9. Serve hot, possibly with a side of green salad",
                             mealDifficulty=3,
-                            imageUrl="https://www.aheadofthyme.com/wp-content/uploads/2018/07/vegan-stuffed-peppers.jpg")
+                            imageUrl="https://www.aheadofthyme.com/wp-content/uploads/2018/07/vegan-stuffed-peppers.jpg", veganCo2=2.3, meatCo2=3.4)
 
         easy_quiz()
         intermediate_quiz()
@@ -353,6 +363,7 @@ def clear_db():
     """Deletes everything in the database when called, useful for testing. Do not include as part of a public version"""
     with app.app_context():
         db.drop_all()
+
 
 # init_db() WILL RESET AND CLEAR THE DATABASE, COMMENT IT OUT IF YOU WANT TO PERSIST INFORMATION ACROSS RUN SESSIONS!
 init_db()

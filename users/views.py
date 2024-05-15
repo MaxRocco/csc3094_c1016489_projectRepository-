@@ -243,6 +243,12 @@ def complete_meal(meal_id):
     current_user.experiencePoints += expAwarded
     current_user.meals_completed += 1
 
+    current_user.totalMeatCo2 += meal.meatCo2
+    current_user.totalVeganCo2 += meal.veganCo2
+
+    current_user.co2Reduction = current_user.totalMeatCo2 - current_user.totalVeganCo2
+    current_user.co2ReductionPercent = (current_user.totalMeatCo2 / current_user.totalVeganCo2) * 100
+
     db.session.commit()
     flash(f'Meal completed! + {expAwarded} EXP. You can view your reflective account on the home page!')
     return redirect(url_for('users.mealTree'))
