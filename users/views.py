@@ -231,15 +231,15 @@ def complete_meal(meal_id):
         flash('Your reflection must be between 25 and 500 characters to mark this meal as complete!')
         return redirect(url_for('users.meal_detail', meal_id=meal_id))
 
-    user_meal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
+    userMeal = UserMeal.query.filter_by(user_id=current_user.id, meal_id=meal_id).first()
     meal = Meal.query.get_or_404(meal_id)
 
-    if not user_meal:
+    if not userMeal:
         new_user_meal = UserMeal(user_id=current_user.id, meal_id=meal_id, completed=True)
         db.session.add(new_user_meal)
 
-    if user_meal and not user_meal.completed:
-        user_meal.completed = True
+    if userMeal and not userMeal.completed:
+        userMeal.completed = True
 
     newPost = Post(
         user_id=current_user.id,
@@ -250,12 +250,12 @@ def complete_meal(meal_id):
     )
     db.session.add(newPost)
 
-    exp_awarded = 25
-    current_user.experiencePoints += exp_awarded
+    expAwarded = 25
+    current_user.experiencePoints += expAwarded
     current_user.meals_completed += 1
 
     db.session.commit()
-    flash(f'Meal completed! + {exp_awarded} EXP. You can view your reflective account on the home page!')
+    flash(f'Meal completed! + {expAwarded} EXP. You can view your reflective account on the home page!')
     return redirect(url_for('users.mealTree'))
 
 

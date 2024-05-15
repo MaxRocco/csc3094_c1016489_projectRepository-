@@ -40,12 +40,12 @@
                 </div>
                 <div class="field">
                     <label class="checkbox">
-                    {{ form.accept_terms() }} I agree to the <a href="{{ url_for('users.terms_and_conditions') }}"
-                                                                target="_blank">Terms and Conditions</a>
-                </label>
+                        {{ form.accept_terms() }} I agree to the <a href="{{ url_for('users.terms_and_conditions') }}"
+                                                                    target="_blank">Terms and Conditions</a>
+                    </label>
                     {% if form.accept_terms.errors %}
-                <p class="help is-danger">{{ form.accept_terms.errors[0] }}</p>
-                {% endif %}
+                        <p class="help is-danger">{{ form.accept_terms.errors[0] }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     {{ form.submit(class="button is-info is-centered") }}

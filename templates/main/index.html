@@ -4,8 +4,10 @@
 
 
     {% if current_user.is_anonymous %}
-        <h1 class="title">Please <a href="{{ url_for('users.login') }}" target=" _blank"><strong>login</strong></a> or <a
-            href="{{ url_for('users.register') }}" target=" _blank"><strong>register</strong></a> an account to access
+        <h1 class="title">Please <a href="{{ url_for('users.login') }}" target=" _blank"><strong>login</strong></a> or
+            <a
+                    href="{{ url_for('users.register') }}" target=" _blank"><strong>register</strong></a> an account to
+            access
             the application!</h1>
     {% endif %}
 
@@ -63,51 +65,51 @@
     <br>
 
     {% if current_user.is_authenticated %}
-    <div id="friend-functionality">
-            <h2>Welcome, {{ current_user.firstname }}!</h2>
+        <div id="friend-functionality">
+        <h2>Welcome, {{ current_user.firstname }}!</h2>
 
 
-            <div>
-                <h3><strong>Your Friend Requests</strong></h3>
-                {% for request in current_user.received_friendships.filter_by(status='pending').all() %}
-                    <p>{{ request.requester.firstname }} wants to be your friend</p>
-                    <form method="post" action="{{ url_for('users.accept_friend_request', request_id=request.id) }}">
-                        <button type="submit">Accept</button>
-                    </form>
-                    <form method="post" action="{{ url_for('users.decline_friend_request', request_id=request.id) }}">
-                        <button type="submit">Decline</button>
-                    </form>
-                {% else %}
-                    <p>You currently have no incoming friend requests</p>
-                {% endfor %}
-            </div>
-
-            <br>
-
-            <div>
-                <h4>Find Users:</h4>
-                <form method="get" action="{{ url_for('users.search_users') }}">
-                    <input type="text" name="query" placeholder="Search for friends by email"
-                           style="padding: 5px; margin: 5px 0; width: 90%;">
-                    <button type="submit">Search</button>
+        <div>
+            <h3><strong>Your Friend Requests</strong></h3>
+            {% for request in current_user.received_friendships.filter_by(status='pending').all() %}
+                <p>{{ request.requester.firstname }} wants to be your friend</p>
+                <form method="post" action="{{ url_for('users.accept_friend_request', request_id=request.id) }}">
+                    <button type="submit">Accept</button>
                 </form>
-            </div>
+                <form method="post" action="{{ url_for('users.decline_friend_request', request_id=request.id) }}">
+                    <button type="submit">Decline</button>
+                </form>
+            {% else %}
+                <p>You currently have no incoming friend requests</p>
+            {% endfor %}
+        </div>
 
-            {% if search_results %}
-                <h5>Search Results: </h5>
-                {% for user in search_results %}
-                    <p>{{ user.firstname }} {{ user.lastname }} - {{ user.email }}</p>
-                    {% if user.id != current_user.id %}
-                        <form method="post" action="{{ url_for('users.send_friend_request', user_id=user.id) }}">
-                            <button type="submit">Send Friend Request</button>
-                        </form>
-                    {% endif %}
-                {% else %}
-                    <p>No users found with this email</p>
-                {% endfor %}
-            {% endif %}
+        <br>
+
+        <div>
+            <h4>Find Users:</h4>
+            <form method="get" action="{{ url_for('users.search_users') }}">
+                <input type="text" name="query" placeholder="Enter a user email to search for friends"
+                       style="padding: 5px; margin: 5px 0; width: 90%;">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        {% if search_results %}
+            <h5>Search Results: </h5>
+            {% for user in search_results %}
+                <p>{{ user.firstname }} {{ user.lastname }} - {{ user.email }}</p>
+                {% if user.id != current_user.id %}
+                    <form method="post" action="{{ url_for('users.send_friend_request', user_id=user.id) }}">
+                        <button type="submit">Send Friend Request</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p>No users have been found using this email address</p>
+            {% endfor %}
         {% endif %}
-    </div>
+    {% endif %}
+</div>
 
     {% if current_user.is_authenticated %}
         <h3><strong>Sent Friend Requests</strong></h3>
@@ -149,7 +151,7 @@
                 <p>You or your friends have not made any reflective posts yet. Go to the <a
                         href="{{ url_for('users.mealTree') }}" target=" _blank"><strong>Meal Progression
                     Tree</strong></a> to complete a
-                    meal and make your first reflective post!
+                    meal to make your first reflective post!
                 </p>
             {% endif %}
         </div>
